@@ -1,4 +1,5 @@
 import operator
+from collections import OrderedDict
 from functools import reduce
 from itertools import islice
 from typing import Dict, Any, List, Tuple, NamedTuple, TypeVar, Sequence, Callable
@@ -47,8 +48,13 @@ class DocumentReference:
 
 
 class Query:
-    def __init__(self, data: Collection) -> None:
+    def __init__(self, data: OrderedDict) -> None:
         self._data = data
+
+    @staticmethod
+    def from_dict(data: Collection) -> 'Query':
+        ordered = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
+        return Query(ordered)
 
     def get(self) -> List[DocumentSnapshot]:
         return [DocumentSnapshot(doc) for doc in self._data.values()]
@@ -56,15 +62,15 @@ class Query:
     def where(self, field: str, op: str, value: Any) -> 'Query':
         compare = self._compare_func(op)
         filtered = {k: v for k, v in self._data.items() if compare(v[field], value)}
-        return Query(dict(filtered))
+        return Query.from_dict(dict(filtered))
 
     def order_by(self, key: str) -> 'Query':
         sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key])
-        return Query(dict(sorted_items))
+        return Query(OrderedDict(sorted_items))
 
     def limit(self, limit_amount: int) -> 'Query':
         limited = islice(self._data.items(), limit_amount)
-        return Query(dict(limited))
+        return Query.from_dict(dict(limited))
 
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
@@ -93,19 +99,19 @@ class CollectionReference:
 
     def get(self) -> List[DocumentSnapshot]:
         collection = get_by_path(self._data, self._path)
-        return [DocumentSnapshot(doc) for doc in collection.values()]
+        return Query.from_dict(collection).get()
 
     def where(self, field: str, op: str, value: Any) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query(collection).where(field, op, value)
+        return Query.from_dict(collection).where(field, op, value)
 
     def order_by(self, key: str) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query(collection).order_by(key)
+        return Query.from_dict(collection).order_by(key)
 
     def limit(self, limit_amount: int) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query(collection).limit(limit_amount)
+        return Query.from_dict(collection).limit(limit_amount)
 
 
 class MockFirestore:
