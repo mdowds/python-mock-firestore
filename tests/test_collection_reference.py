@@ -40,6 +40,15 @@ class TestCollectionReference(TestCase):
         docs = fs.collection('foo').document('first').collection('bar').get()
         self.assertEqual([], docs)
 
+    def test_collection_get_ordersByAscendingDocumentId_byDefault(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'beta': {'id': 1},
+            'alpha': {'id': 2}
+        }}
+        docs = fs.collection('foo').get()
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+
     def test_collection_whereEquals(self):
         fs = MockFirestore()
         fs._data = {'foo': {
