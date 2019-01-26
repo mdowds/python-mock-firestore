@@ -59,7 +59,7 @@ class Query:
         return Query(dict(filtered))
 
     def order_by(self, key: str) -> 'Query':
-        sorted_items: List[KeyValuePair] = sorted(self._data.items(), key=lambda doc: doc[1][key])
+        sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key])
         return Query(dict(sorted_items))
 
     def limit(self, limit_amount: int) -> 'Query':
@@ -111,7 +111,7 @@ class CollectionReference:
 class MockFirestore:
 
     def __init__(self) -> None:
-        self._data: Store = {}
+        self._data = {}
 
     def collection(self, name: str) -> CollectionReference:
         if name not in self._data:
