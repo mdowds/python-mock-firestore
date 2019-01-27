@@ -2,15 +2,13 @@ import operator
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
-from typing import Dict, Any, List, Tuple, NamedTuple, TypeVar, Sequence, Callable
+from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
 Document = Dict[str, Any]
 Collection = Dict[str, Document]
 Store = Dict[str, Collection]
-
-GeoPoint = NamedTuple('GeoPoint', (('latitude', float), ('longitude', float)))
 
 
 class DocumentSnapshot:
