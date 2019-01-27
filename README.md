@@ -50,6 +50,7 @@ mock_db.collection('users').document('alovelace').collection('friends')
 
 # Querying
 mock_db.collection('users').document('alovelace').order_by('born').get()
+mock_db.collection('users').document('alovelace').order_by('born', direction='DESCENDING').get()
 mock_db.collection('users').document('alovelace').limit(5).get()
 mock_db.collection('users').document('alovelace').where('born', '==', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '<', 1815).get()

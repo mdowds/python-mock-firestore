@@ -2,7 +2,7 @@ import operator
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
-from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable
+from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
@@ -60,8 +60,8 @@ class Query:
         filtered = {k: v for k, v in self._data.items() if compare(v[field], value)}
         return Query(OrderedDict(filtered))
 
-    def order_by(self, key: str) -> 'Query':
-        sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key])
+    def order_by(self, key: str, direction: Optional[str] = 'ASCENDING') -> 'Query':
+        sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key], reverse=direction == 'DESCENDING')
         return Query(OrderedDict(sorted_items))
 
     def limit(self, limit_amount: int) -> 'Query':
@@ -101,9 +101,9 @@ class CollectionReference:
         collection = get_by_path(self._data, self._path)
         return Query(collection).where(field, op, value)
 
-    def order_by(self, key: str) -> Query:
+    def order_by(self, key: str, direction: Optional[str] = None) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query(collection).order_by(key)
+        return Query(collection).order_by(key, direction)
 
     def limit(self, limit_amount: int) -> Query:
         collection = get_by_path(self._data, self._path)

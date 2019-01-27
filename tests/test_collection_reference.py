@@ -112,6 +112,19 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'order': 1}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())
 
+    def test_collection_orderBy_descending(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'order': 2},
+            'second': {'order': 3},
+            'third': {'order': 1}
+        }}
+
+        docs = fs.collection('foo').order_by('order', direction="DESCENDING").get()
+        self.assertEqual({'order': 3}, docs[0].to_dict())
+        self.assertEqual({'order': 2}, docs[1].to_dict())
+        self.assertEqual({'order': 1}, docs[2].to_dict())
+
     def test_collection_limit(self):
         fs = MockFirestore()
         fs._data = {'foo': {
