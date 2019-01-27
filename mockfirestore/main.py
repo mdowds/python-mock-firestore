@@ -46,13 +46,11 @@ class DocumentReference:
 
 
 class Query:
-    def __init__(self, data: OrderedDict) -> None:
-        self._data = data
-
-    @staticmethod
-    def from_dict(data: Collection) -> 'Query':
-        ordered = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
-        return Query(ordered)
+    def __init__(self, data: Collection) -> None:
+        if isinstance(data, OrderedDict):
+            self._data = data
+        else:
+            self._data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
 
     def get(self) -> List[DocumentSnapshot]:
         return [DocumentSnapshot(doc) for doc in self._data.values()]
@@ -60,7 +58,7 @@ class Query:
     def where(self, field: str, op: str, value: Any) -> 'Query':
         compare = self._compare_func(op)
         filtered = {k: v for k, v in self._data.items() if compare(v[field], value)}
-        return Query.from_dict(dict(filtered))
+        return Query(OrderedDict(filtered))
 
     def order_by(self, key: str) -> 'Query':
         sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key])
@@ -68,7 +66,7 @@ class Query:
 
     def limit(self, limit_amount: int) -> 'Query':
         limited = islice(self._data.items(), limit_amount)
-        return Query.from_dict(dict(limited))
+        return Query(OrderedDict(limited))
 
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
@@ -97,19 +95,19 @@ class CollectionReference:
 
     def get(self) -> List[DocumentSnapshot]:
         collection = get_by_path(self._data, self._path)
-        return Query.from_dict(collection).get()
+        return Query(collection).get()
 
     def where(self, field: str, op: str, value: Any) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query.from_dict(collection).where(field, op, value)
+        return Query(collection).where(field, op, value)
 
     def order_by(self, key: str) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query.from_dict(collection).order_by(key)
+        return Query(collection).order_by(key)
 
     def limit(self, limit_amount: int) -> Query:
         collection = get_by_path(self._data, self._path)
-        return Query.from_dict(collection).limit(limit_amount)
+        return Query(collection).limit(limit_amount)
 
 
 class MockFirestore:

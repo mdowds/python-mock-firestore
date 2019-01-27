@@ -129,6 +129,6 @@ class TestCollectionReference(TestCase):
             'second': {'order': 1},
             'third': {'order': 3}
         }}
-        docs = fs.collection('foo').limit(2).order_by('order').get()
+        docs = fs.collection('foo').order_by('order').limit(2).get()
         self.assertEqual({'order': 1}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())
