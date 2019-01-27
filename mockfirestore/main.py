@@ -57,8 +57,8 @@ class Query:
 
     def where(self, field: str, op: str, value: Any) -> 'Query':
         compare = self._compare_func(op)
-        filtered = {k: v for k, v in self._data.items() if compare(v[field], value)}
-        return Query(OrderedDict(filtered))
+        filtered = OrderedDict((k, v) for k, v in self._data.items() if compare(v[field], value))
+        return Query(filtered)
 
     def order_by(self, key: str, direction: Optional[str] = 'ASCENDING') -> 'Query':
         sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key], reverse=direction == 'DESCENDING')
