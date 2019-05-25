@@ -9,6 +9,7 @@ setuptools.setup(
     author="Matt Dowds",
     description="In-memory implementation of Google Cloud Firestore for use in tests",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/mdowds/mock-firestore",
     packages=setuptools.find_packages(),
     test_suite='',
