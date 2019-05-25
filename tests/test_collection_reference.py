@@ -10,14 +10,15 @@ class TestCollectionReference(TestCase):
             'first': {'id': 1},
             'second': {'id': 2}
         }}
-        docs = fs.collection('foo').get()
+        docs = list(fs.collection('foo').get())
+
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual({'id': 2}, docs[1].to_dict())
 
     def test_collection_get_collectionDoesNotExist(self):
         fs = MockFirestore()
         docs = fs.collection('foo').get()
-        self.assertEqual([], docs)
+        self.assertEqual([], list(docs))
 
     def test_collection_get_nestedCollection(self):
         fs = MockFirestore()
@@ -29,7 +30,7 @@ class TestCollectionReference(TestCase):
                 }
             }
         }}
-        docs = fs.collection('foo').document('first').collection('bar').get()
+        docs = list(fs.collection('foo').document('first').collection('bar').get())
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
 
     def test_collection_get_nestedCollection_collectionDoesNotExist(self):
@@ -37,7 +38,7 @@ class TestCollectionReference(TestCase):
         fs._data = {'foo': {
             'first': {'id': 1}
         }}
-        docs = fs.collection('foo').document('first').collection('bar').get()
+        docs = list(fs.collection('foo').document('first').collection('bar').get())
         self.assertEqual([], docs)
 
     def test_collection_get_ordersByAscendingDocumentId_byDefault(self):
@@ -46,7 +47,7 @@ class TestCollectionReference(TestCase):
             'beta': {'id': 1},
             'alpha': {'id': 2}
         }}
-        docs = fs.collection('foo').get()
+        docs = list(fs.collection('foo').get())
         self.assertEqual({'id': 2}, docs[0].to_dict())
 
     def test_collection_whereEquals(self):
@@ -56,7 +57,7 @@ class TestCollectionReference(TestCase):
             'second': {'valid': False}
         }}
 
-        docs = fs.collection('foo').where('valid', '==', True).get()
+        docs = list(fs.collection('foo').where('valid', '==', True).get())
         self.assertEqual({'valid': True}, docs[0].to_dict())
 
     def test_collection_whereLessThan(self):
@@ -66,7 +67,7 @@ class TestCollectionReference(TestCase):
             'second': {'count': 5}
         }}
 
-        docs = fs.collection('foo').where('count', '<', 5).get()
+        docs = list(fs.collection('foo').where('count', '<', 5).get())
         self.assertEqual({'count': 1}, docs[0].to_dict())
 
     def test_collection_whereLessThanOrEqual(self):
@@ -76,7 +77,7 @@ class TestCollectionReference(TestCase):
             'second': {'count': 5}
         }}
 
-        docs = fs.collection('foo').where('count', '<=', 5).get()
+        docs = list(fs.collection('foo').where('count', '<=', 5).get())
         self.assertEqual({'count': 1}, docs[0].to_dict())
         self.assertEqual({'count': 5}, docs[1].to_dict())
 
@@ -87,7 +88,7 @@ class TestCollectionReference(TestCase):
             'second': {'count': 5}
         }}
 
-        docs = fs.collection('foo').where('count', '>', 1).get()
+        docs = list(fs.collection('foo').where('count', '>', 1).get())
         self.assertEqual({'count': 5}, docs[0].to_dict())
 
     def test_collection_whereGreaterThanOrEqual(self):
@@ -97,7 +98,7 @@ class TestCollectionReference(TestCase):
             'second': {'count': 5}
         }}
 
-        docs = fs.collection('foo').where('count', '>=', 1).get()
+        docs = list(fs.collection('foo').where('count', '>=', 1).get())
         self.assertEqual({'count': 1}, docs[0].to_dict())
         self.assertEqual({'count': 5}, docs[1].to_dict())
 
@@ -108,7 +109,7 @@ class TestCollectionReference(TestCase):
             'second': {'order': 1}
         }}
 
-        docs = fs.collection('foo').order_by('order').get()
+        docs = list(fs.collection('foo').order_by('order').get())
         self.assertEqual({'order': 1}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())
 
@@ -120,7 +121,7 @@ class TestCollectionReference(TestCase):
             'third': {'order': 1}
         }}
 
-        docs = fs.collection('foo').order_by('order', direction="DESCENDING").get()
+        docs = list(fs.collection('foo').order_by('order', direction="DESCENDING").get())
         self.assertEqual({'order': 3}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())
         self.assertEqual({'order': 1}, docs[2].to_dict())
@@ -131,7 +132,7 @@ class TestCollectionReference(TestCase):
             'first': {'id': 1},
             'second': {'id': 2}
         }}
-        docs = fs.collection('foo').limit(1).get()
+        docs = list(fs.collection('foo').limit(1).get())
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
@@ -142,6 +143,6 @@ class TestCollectionReference(TestCase):
             'second': {'order': 1},
             'third': {'order': 3}
         }}
-        docs = fs.collection('foo').order_by('order').limit(2).get()
+        docs = list(fs.collection('foo').order_by('order').limit(2).get())
         self.assertEqual({'order': 1}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())

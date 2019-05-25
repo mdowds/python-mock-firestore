@@ -2,7 +2,7 @@ import operator
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
-from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional
+from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional, Iterator
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
@@ -52,8 +52,8 @@ class Query:
         else:
             self._data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
 
-    def get(self) -> List[DocumentSnapshot]:
-        return [DocumentSnapshot(doc) for doc in self._data.values()]
+    def get(self) -> Iterator[DocumentSnapshot]:
+        return (DocumentSnapshot(doc) for doc in self._data.values())
 
     def where(self, field: str, op: str, value: Any) -> 'Query':
         compare = self._compare_func(op)
@@ -93,7 +93,7 @@ class CollectionReference:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path)
 
-    def get(self) -> List[DocumentSnapshot]:
+    def get(self) -> Iterator[DocumentSnapshot]:
         collection = get_by_path(self._data, self._path)
         return Query(collection).get()
 
