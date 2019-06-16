@@ -12,6 +12,21 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'id': 1}, doc)
 
+    def test_document_get_documentIdEqualsKey(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc_ref = fs.collection('foo').document('first')
+        self.assertEqual('first', doc_ref.id)
+
+    def test_document_get_newDocumentReturnsDefaultId(self):
+        fs = MockFirestore()
+        doc_ref = fs.collection('foo').document()
+        doc = doc_ref.get()
+        self.assertNotEqual(None, doc_ref.id)
+        self.assertFalse(doc.exists)
+
     def test_document_get_documentDoesNotExist(self):
         fs = MockFirestore()
         fs._data = {'foo': {}}
