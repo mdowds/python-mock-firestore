@@ -31,7 +31,10 @@ class DocumentReference:
     def get(self) -> DocumentSnapshot:
         return DocumentSnapshot(get_by_path(self._data, self._path))
 
-    def set(self, data: Document):
+    def set(self, data: Dict, merge=False):
+        if merge:
+            self.update(data)
+        else:
         set_by_path(self._data, self._path, data)
 
     def update(self, data: Dict[str, Any]):

@@ -60,6 +60,24 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('bar').get().to_dict()
         self.assertEqual(doc_content, doc)
 
+    def test_document_set_mergeNewValue(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        fs.collection('foo').document('first').set({'updated': True}, merge=True)
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'id': 1, 'updated': True}, doc)
+
+    def test_document_set_overwriteValue(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        fs.collection('foo').document('first').set({'new_id': 1}, merge=False)
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'new_id': 1}, doc)
+
     def test_document_update_addNewValue(self):
         fs = MockFirestore()
         fs._data = {'foo': {
