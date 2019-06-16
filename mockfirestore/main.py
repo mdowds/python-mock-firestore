@@ -31,11 +31,14 @@ class DocumentReference:
     def get(self) -> DocumentSnapshot:
         return DocumentSnapshot(get_by_path(self._data, self._path))
 
+    def delete(self):
+        delete_by_path(self._data, self._path)
+
     def set(self, data: Dict, merge=False):
         if merge:
             self.update(data)
         else:
-        set_by_path(self._data, self._path, data)
+            set_by_path(self._data, self._path, data)
 
     def update(self, data: Dict[str, Any]):
         get_by_path(self._data, self._path).update(data)
@@ -135,3 +138,8 @@ def get_by_path(data: Dict[str, T], path: Sequence[str]) -> T:
 def set_by_path(data: Dict[str, T], path: Sequence[str], value: T):
     """Set a value in a nested object in root by item sequence."""
     get_by_path(data, path[:-1])[path[-1]] = value
+
+
+def delete_by_path(data: Dict[str, T], path: Sequence[str]):
+    """Delete a value in a nested object in root by item sequence."""
+    del get_by_path(data, path[:-1])[path[-1]]
