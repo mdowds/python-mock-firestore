@@ -1,4 +1,6 @@
 import operator
+import random
+import string
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
@@ -27,6 +29,10 @@ class DocumentReference:
     def __init__(self, data: Store, path: List[str]) -> None:
         self._data = data
         self._path = path
+
+    @property
+    def id(self):
+        return self._path[-1]
 
     def get(self) -> DocumentSnapshot:
         return DocumentSnapshot(get_by_path(self._data, self._path))
@@ -92,8 +98,10 @@ class CollectionReference:
         self._data = data
         self._path = path
 
-    def document(self, name: str) -> DocumentReference:
+    def document(self, name: Optional[str] = None) -> DocumentReference:
         collection = get_by_path(self._data, self._path)
+        if name is None:
+            name = generate_random_string()
         new_path = self._path + [name]
         if name not in collection:
             set_by_path(self._data, new_path, {})
@@ -143,3 +151,7 @@ def set_by_path(data: Dict[str, T], path: Sequence[str], value: T):
 def delete_by_path(data: Dict[str, T], path: Sequence[str]):
     """Delete a value in a nested object in root by item sequence."""
     del get_by_path(data, path[:-1])[path[-1]]
+
+
+def generate_random_string():
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
