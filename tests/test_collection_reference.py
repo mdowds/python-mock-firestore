@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from mockfirestore import MockFirestore
+from mockfirestore import MockFirestore, DocumentReference
 
 
 class TestCollectionReference(TestCase):
@@ -146,3 +146,15 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').order_by('order').limit(2).get())
         self.assertEqual({'order': 1}, docs[0].to_dict())
         self.assertEqual({'order': 2}, docs[1].to_dict())
+
+    def test_collection_listDocuments(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'order': 2},
+            'second': {'order': 1},
+            'third': {'order': 3}
+        }}
+        doc_refs = list(fs.collection('foo').list_documents())
+        self.assertEqual(3, len(doc_refs))
+        for doc_ref in doc_refs:
+            self.assertIsInstance(doc_ref, DocumentReference)

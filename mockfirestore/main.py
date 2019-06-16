@@ -123,6 +123,12 @@ class CollectionReference:
         collection = get_by_path(self._data, self._path)
         return Query(collection).limit(limit_amount)
 
+    def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
+        docs = []
+        for key in get_by_path(self._data, self._path):
+            docs.append(self.document(key))
+        return docs
+
 
 class MockFirestore:
 
