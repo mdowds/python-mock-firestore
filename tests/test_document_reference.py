@@ -95,3 +95,12 @@ class TestDocumentReference(TestCase):
         fs.collection('foo').document('first').update({'id': 2})
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'id': 2}, doc)
+
+    def test_document_delete_documentDoesNotExistAfterDelete(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        fs.collection('foo').document('first').delete()
+        doc = fs.collection('foo').document('first').get()
+        self.assertEqual(False, doc.exists)
