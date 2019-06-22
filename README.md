@@ -33,9 +33,12 @@ mock_db = MockFirestore()
 # Collections
 mock_db.collection('users')
 mock_db.collection('users').get()
+mock_db.collection('users').list_documents()
 
 # Documents
+mock_db.collection('users').document()
 mock_db.collection('users').document('alovelace')
+mock_db.collection('users').document('alovelace').id
 mock_db.collection('users').document('alovelace').get()
 mock_db.collection('users').document('alovelace').get().exists
 mock_db.collection('users').document('alovelace').get().to_dict()
@@ -43,10 +46,14 @@ mock_db.collection('users').document('alovelace').set({
     'first': 'Ada',
     'last': 'Lovelace'
 })
+mock_db.collection('users').document('alovelace').set({
+    'first': 'Augusta Ada'
+}, merge=True)
 mock_db.collection('users').document('alovelace').update({
     'born': 1815
 })
 mock_db.collection('users').document('alovelace').collection('friends')
+mock_db.collection('users').document('alovelace').delete()
 
 # Querying
 mock_db.collection('users').document('alovelace').order_by('born').get()
