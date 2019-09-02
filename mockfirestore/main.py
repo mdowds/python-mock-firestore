@@ -14,7 +14,8 @@ Store = Dict[str, Collection]
 
 
 class DocumentSnapshot:
-    def __init__(self, doc: Document) -> None:
+    def __init__(self, doc_id, doc: Document) -> None:
+        self.id = doc_id
         self._doc = doc
 
     @property
@@ -35,7 +36,7 @@ class DocumentReference:
         return self._path[-1]
 
     def get(self) -> DocumentSnapshot:
-        return DocumentSnapshot(get_by_path(self._data, self._path))
+        return DocumentSnapshot(self.id, get_by_path(self._data, self._path))
 
     def delete(self):
         delete_by_path(self._data, self._path)
@@ -65,7 +66,7 @@ class Query:
             self._data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
 
     def get(self) -> Iterator[DocumentSnapshot]:
-        return (DocumentSnapshot(doc) for doc in self._data.values())
+        return (DocumentSnapshot(doc_id, doc) for doc_id, doc in self._data.items())
 
     def where(self, field: str, op: str, value: Any) -> 'Query':
         compare = self._compare_func(op)
@@ -91,6 +92,14 @@ class Query:
             return lambda x, y: x > y
         elif op == '>=':
             return lambda x, y: x >= y
+        elif op == 'array_contains':
+            return self._in_list
+
+    def _in_list(self, x, y):
+        if isinstance(y, DocumentReference):
+            return len([item for item in x if item.__eq__(y)]) == 1
+        else:
+            return len([item for item in x if item == y]) == 1
 
 
 class CollectionReference:
