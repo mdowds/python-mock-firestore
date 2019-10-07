@@ -1,6 +1,7 @@
 import operator
 import random
 import string
+from datetime import datetime as dt
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
@@ -11,6 +12,23 @@ KeyValuePair = Tuple[str, Dict[str, Any]]
 Document = Dict[str, Any]
 Collection = Dict[str, Document]
 Store = Dict[str, Collection]
+
+
+class Timestamp:
+    """
+    Imitates some properties of `google.protobuf.timestamp_pb2.Timestamp`
+    """
+
+    def __init__(self, timestamp: float):
+        self._timestamp = timestamp
+
+    @property
+    def seconds(self):
+        return str(self._timestamp).split('.')[0]
+
+    @property
+    def nanos(self):
+        return str(self._timestamp).split('.')[1]
 
 
 class DocumentSnapshot:
