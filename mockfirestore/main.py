@@ -13,6 +13,29 @@ Document = Dict[str, Any]
 Collection = Dict[str, Document]
 Store = Dict[str, Collection]
 
+# by analogy with
+# https://github.com/mongomock/mongomock/blob/develop/mongomock/__init__.py
+# try to import gcloud exceptions
+# and if gcloud is not installed, define our own
+try:
+    from google.cloud.exceptions import ClientError, Conflict, AlreadyExists
+except ImportError:
+    class ClientError(Exception):
+        code = None
+
+        def __init__(self, message, *args):
+            self.message = message
+            super().__init__(message, *args)
+
+        def __str__(self):
+            return "{} {}".format(self.code, self.message)
+
+    class Conflict(ClientError):
+        code = 409
+
+    class AlreadyExists(Conflict):
+        pass
+
 
 class Timestamp:
     """
@@ -21,6 +44,11 @@ class Timestamp:
 
     def __init__(self, timestamp: float):
         self._timestamp = timestamp
+
+    @classmethod
+    def from_now(cls):
+        timestamp = dt.now().timestamp()
+        return cls(timestamp)
 
     @property
     def seconds(self):
@@ -41,6 +69,11 @@ class DocumentSnapshot:
 
     def to_dict(self) -> Document:
         return self._doc
+
+    @property
+    def create_time(self) -> Timestamp:
+        timestamp = Timestamp.from_now()
+        return timestamp
 
 
 class DocumentReference:
@@ -124,6 +157,19 @@ class CollectionReference:
         if name not in collection:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path)
+
+    def add(self, document_data: Dict, document_id: str = None) \
+            -> Tuple[Timestamp, DocumentReference]:
+        if document_id is None:
+            document_id = document_data.get('id', generate_random_string())
+        collection = get_by_path(self._data, self._path)
+        new_path = self._path + [document_id]
+        if document_id in collection:
+            raise AlreadyExists('Document already exists: {}'.format(new_path))
+        doc_ref = DocumentReference(self._data, new_path)
+        doc_ref.set(document_data)
+        timestamp = Timestamp.from_now()
+        return timestamp, doc_ref
 
     def get(self) -> Iterator[DocumentSnapshot]:
         collection = get_by_path(self._data, self._path)
