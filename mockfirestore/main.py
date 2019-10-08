@@ -59,27 +59,63 @@ class DocumentReference:
 
 
 class Query:
-    def __init__(self, data: Collection) -> None:
-        if isinstance(data, OrderedDict):
-            self._data = data
-        else:
-            self._data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
+    def __init__(self, parent: 'CollectionReference', projection=None,
+                 field_filters=(), orders=(), limit=None, offset=None,
+                 start_at=None, end_at=None, all_descendants=False) -> None:
+        self.parent = parent
+        self.projection = projection
+        self._field_filters = []
+        self.orders = list(orders)
+        self._limit = limit
+        self.offset = offset
+        self.start_at = start_at
+        self.end_at = end_at
+        self.all_descendants = all_descendants
+
+        if field_filters:
+            for field_filter in field_filters:
+                self._add_field_filter(*field_filter)
+
+    @property
+    def _data(self) -> OrderedDict:
+        data = get_by_path(self.parent._data, self.parent._path)
+        if not isinstance(data, OrderedDict):
+            data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
+
+        for field, compare, value in self._field_filters:
+            data = OrderedDict((k, v) for k, v in data.items() if compare(v[field], value))
+
+        if self.orders:
+            for key, direction in self.orders:
+                sorted_items = sorted(data.items(),
+                                      key=lambda doc: doc[1][key],
+                                      reverse=direction == 'DESCENDING')
+                data = OrderedDict(sorted_items)
+
+        if self._limit:
+            limited = islice(data.items(), self._limit)
+            data = OrderedDict(limited)
+
+        return data
 
     def get(self) -> Iterator[DocumentSnapshot]:
         return (DocumentSnapshot(doc) for doc in self._data.values())
 
-    def where(self, field: str, op: str, value: Any) -> 'Query':
+    def _add_field_filter(self, field: str, op: str, value: Any):
         compare = self._compare_func(op)
-        filtered = OrderedDict((k, v) for k, v in self._data.items() if compare(v[field], value))
-        return Query(filtered)
+        self._field_filters.append((field, compare, value))
+
+    def where(self, field: str, op: str, value: Any) -> 'Query':
+        self._add_field_filter(field, op, value)
+        return self
 
     def order_by(self, key: str, direction: Optional[str] = 'ASCENDING') -> 'Query':
-        sorted_items = sorted(self._data.items(), key=lambda doc: doc[1][key], reverse=direction == 'DESCENDING')
-        return Query(OrderedDict(sorted_items))
+        self.orders.append((key, direction))
+        return self
 
     def limit(self, limit_amount: int) -> 'Query':
-        limited = islice(self._data.items(), limit_amount)
-        return Query(OrderedDict(limited))
+        self._limit = limit_amount
+        return self
 
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
@@ -109,20 +145,19 @@ class CollectionReference:
         return DocumentReference(self._data, new_path)
 
     def get(self) -> Iterator[DocumentSnapshot]:
-        collection = get_by_path(self._data, self._path)
-        return Query(collection).get()
+        return Query(self).get()
 
     def where(self, field: str, op: str, value: Any) -> Query:
-        collection = get_by_path(self._data, self._path)
-        return Query(collection).where(field, op, value)
+        query = Query(self, field_filters=[(field, op, value)])
+        return query
 
     def order_by(self, key: str, direction: Optional[str] = None) -> Query:
-        collection = get_by_path(self._data, self._path)
-        return Query(collection).order_by(key, direction)
+        query = Query(self, orders=[(key, direction)])
+        return query
 
     def limit(self, limit_amount: int) -> Query:
-        collection = get_by_path(self._data, self._path)
-        return Query(collection).limit(limit_amount)
+        query = Query(self, limit=limit_amount)
+        return query
 
     def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
         docs = []
