@@ -27,3 +27,13 @@ class TestDocumentSnapshot(TestCase):
         }}
         doc = fs.collection('foo').document('second').get()
         self.assertFalse(doc.exists)
+
+    def test_documentSnapshot_reference(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc_ref = fs.collection('foo').document('second')
+        doc_snapshot = doc_ref.get()
+        self.assertIs(doc_ref, doc_snapshot.reference)
+
