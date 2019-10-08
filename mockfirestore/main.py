@@ -15,8 +15,9 @@ Store = Dict[str, Collection]
 
 
 class DocumentSnapshot:
-    def __init__(self, doc: Document) -> None:
-        self._doc = doc
+    def __init__(self, reference: 'DocumentReference', data: Document) -> None:
+        self.reference = reference
+        self._doc = data
 
     @property
     def exists(self) -> bool:
@@ -36,7 +37,7 @@ class DocumentReference:
         return self._path[-1]
 
     def get(self) -> DocumentSnapshot:
-        return DocumentSnapshot(get_by_path(self._data, self._path))
+        return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
     def delete(self):
         delete_by_path(self._data, self._path)
@@ -99,7 +100,9 @@ class Query:
         return data
 
     def get(self) -> Iterator[DocumentSnapshot]:
-        return (DocumentSnapshot(doc) for doc in self._data.values())
+        doc_refs = self.parent.list_documents()
+        return (DocumentSnapshot(doc_ref, doc) for doc_ref, doc
+                in zip(doc_refs, self._data.values()))
 
     def _add_field_filter(self, field: str, op: str, value: Any):
         compare = self._compare_func(op)
