@@ -34,6 +34,7 @@ mock_db = MockFirestore()
 mock_db.collection('users')
 mock_db.collection('users').get()
 mock_db.collection('users').list_documents()
+mock_db.collection('users').stream()
 
 # Documents
 mock_db.collection('users').document()
