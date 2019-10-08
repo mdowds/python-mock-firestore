@@ -4,7 +4,8 @@ import string
 from collections import OrderedDict
 from functools import reduce
 from itertools import islice
-from typing import Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional, Iterator
+from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional,
+                    Iterator, Iterable)
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
@@ -128,6 +129,11 @@ class CollectionReference:
         for key in get_by_path(self._data, self._path):
             docs.append(self.document(key))
         return docs
+
+    def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
+        for key in get_by_path(self._data, self._path):
+            doc_snapshot = self.document(key).get()
+            yield doc_snapshot
 
 
 class MockFirestore:

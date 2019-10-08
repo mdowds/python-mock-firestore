@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from mockfirestore import MockFirestore, DocumentReference
+from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot
 
 
 class TestCollectionReference(TestCase):
@@ -158,3 +158,15 @@ class TestCollectionReference(TestCase):
         self.assertEqual(3, len(doc_refs))
         for doc_ref in doc_refs:
             self.assertIsInstance(doc_ref, DocumentReference)
+
+    def test_collection_stream(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'order': 2},
+            'second': {'order': 1},
+            'third': {'order': 3}
+        }}
+        doc_snapshots = list(fs.collection('foo').stream())
+        self.assertEqual(3, len(doc_snapshots))
+        for doc_snapshot in doc_snapshots:
+            self.assertIsInstance(doc_snapshot, DocumentSnapshot)
