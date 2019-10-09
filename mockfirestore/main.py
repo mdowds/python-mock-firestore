@@ -6,6 +6,7 @@ from functools import reduce
 from itertools import islice
 from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional,
                     Iterator, Iterable)
+import warnings
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
@@ -99,10 +100,15 @@ class Query:
 
         return data
 
-    def get(self) -> Iterator[DocumentSnapshot]:
+    def stream(self) -> Iterator[DocumentSnapshot]:
         doc_refs = self.parent.list_documents()
         return (DocumentSnapshot(doc_ref, doc) for doc_ref, doc
                 in zip(doc_refs, self._data.values()))
+
+    def get(self) -> Iterator[DocumentSnapshot]:
+        warnings.warn('Query.get is deprecated, please use Query.stream',
+                      category=DeprecationWarning)
+        return self.stream()
 
     def _add_field_filter(self, field: str, op: str, value: Any):
         compare = self._compare_func(op)
