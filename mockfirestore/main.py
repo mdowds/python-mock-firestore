@@ -2,6 +2,7 @@ import operator
 import random
 import string
 from collections import OrderedDict
+from copy import deepcopy
 from functools import reduce
 from itertools import islice
 from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional,
@@ -18,7 +19,7 @@ Store = Dict[str, Collection]
 class DocumentSnapshot:
     def __init__(self, reference: 'DocumentReference', data: Document) -> None:
         self.reference = reference
-        self._doc = data
+        self._doc = deepcopy(data)
 
     @property
     def exists(self) -> bool:
