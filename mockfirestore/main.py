@@ -153,8 +153,10 @@ class CollectionReference:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path)
 
-    def get(self) -> Iterator[DocumentSnapshot]:
-        return Query(self).get()
+    def get(self) -> Iterable[DocumentSnapshot]:
+        warnings.warn('Collection.get is deprecated, please use Collection.stream',
+                      category=DeprecationWarning)
+        return self.stream()
 
     def where(self, field: str, op: str, value: Any) -> Query:
         query = Query(self, field_filters=[(field, op, value)])
@@ -175,7 +177,7 @@ class CollectionReference:
         return docs
 
     def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
-        for key in get_by_path(self._data, self._path):
+        for key in sorted(get_by_path(self._data, self._path)):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot
 
