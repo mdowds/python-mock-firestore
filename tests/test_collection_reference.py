@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot
+from mockfirestore.main import AlreadyExists
 
 
 class TestCollectionReference(TestCase):
@@ -183,3 +184,18 @@ class TestCollectionReference(TestCase):
             doc_reference = doc_snapshot.reference
             subcollection = doc_reference.collection('order')
             self.assertIs(subcollection.parent, doc_reference)
+
+    def test_collection_addDocument(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {}}
+        doc_id = 'bar'
+        doc_content = {'id': doc_id, 'xy': 'z'}
+        timestamp, doc_ref = fs.collection('foo').add(doc_content)
+        self.assertEqual(doc_content, doc_ref.get().to_dict())
+
+        doc = fs.collection('foo').document(doc_id).get().to_dict()
+        self.assertEqual(doc_content, doc)
+
+        with self.assertRaises(AlreadyExists):
+            fs.collection('foo').add(doc_content)
+

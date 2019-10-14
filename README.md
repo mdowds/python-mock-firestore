@@ -56,6 +56,9 @@ mock_db.collection('users').document('alovelace').update({
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
 
+mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'},
+                                'alovelace')
+
 # Querying
 mock_db.collection('users').document('alovelace').order_by('born').get()
 mock_db.collection('users').document('alovelace').order_by('born', direction='DESCENDING').get()

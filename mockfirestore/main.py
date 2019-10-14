@@ -1,6 +1,7 @@
 import operator
 import random
 import string
+from datetime import datetime as dt
 from collections import OrderedDict
 from copy import deepcopy
 from functools import reduce
@@ -15,6 +16,51 @@ Document = Dict[str, Any]
 Collection = Dict[str, Document]
 Store = Dict[str, Collection]
 
+# by analogy with
+# https://github.com/mongomock/mongomock/blob/develop/mongomock/__init__.py
+# try to import gcloud exceptions
+# and if gcloud is not installed, define our own
+try:
+    from google.cloud.exceptions import ClientError, Conflict, AlreadyExists
+except ImportError:
+    class ClientError(Exception):
+        code = None
+
+        def __init__(self, message, *args):
+            self.message = message
+            super().__init__(message, *args)
+
+        def __str__(self):
+            return "{} {}".format(self.code, self.message)
+
+    class Conflict(ClientError):
+        code = 409
+
+    class AlreadyExists(Conflict):
+        pass
+
+
+class Timestamp:
+    """
+    Imitates some properties of `google.protobuf.timestamp_pb2.Timestamp`
+    """
+
+    def __init__(self, timestamp: float):
+        self._timestamp = timestamp
+
+    @classmethod
+    def from_now(cls):
+        timestamp = dt.now().timestamp()
+        return cls(timestamp)
+
+    @property
+    def seconds(self):
+        return str(self._timestamp).split('.')[0]
+
+    @property
+    def nanos(self):
+        return str(self._timestamp).split('.')[1]
+
 
 class DocumentSnapshot:
     def __init__(self, reference: 'DocumentReference', data: Document) -> None:
@@ -27,6 +73,11 @@ class DocumentSnapshot:
 
     def to_dict(self) -> Document:
         return self._doc
+
+    @property
+    def create_time(self) -> Timestamp:
+        timestamp = Timestamp.from_now()
+        return timestamp
 
 
 class DocumentReference:
@@ -162,6 +213,19 @@ class CollectionReference:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',
                       category=DeprecationWarning)
         return self.stream()
+
+    def add(self, document_data: Dict, document_id: str = None) \
+            -> Tuple[Timestamp, DocumentReference]:
+        if document_id is None:
+            document_id = document_data.get('id', generate_random_string())
+        collection = get_by_path(self._data, self._path)
+        new_path = self._path + [document_id]
+        if document_id in collection:
+            raise AlreadyExists('Document already exists: {}'.format(new_path))
+        doc_ref = DocumentReference(self._data, new_path, parent=self)
+        doc_ref.set(document_data)
+        timestamp = Timestamp.from_now()
+        return timestamp, doc_ref
 
     def where(self, field: str, op: str, value: Any) -> Query:
         query = Query(self, field_filters=[(field, op, value)])
