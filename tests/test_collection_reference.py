@@ -170,3 +170,16 @@ class TestCollectionReference(TestCase):
         self.assertEqual(3, len(doc_snapshots))
         for doc_snapshot in doc_snapshots:
             self.assertIsInstance(doc_snapshot, DocumentSnapshot)
+
+    def test_collection_parent(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'order': 2},
+            'second': {'order': 1},
+            'third': {'order': 3}
+        }}
+        doc_snapshots = fs.collection('foo').stream()
+        for doc_snapshot in doc_snapshots:
+            doc_reference = doc_snapshot.reference
+            subcollection = doc_reference.collection('order')
+            self.assertIs(subcollection.parent, doc_reference)

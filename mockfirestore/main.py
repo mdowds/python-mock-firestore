@@ -30,9 +30,11 @@ class DocumentSnapshot:
 
 
 class DocumentReference:
-    def __init__(self, data: Store, path: List[str]) -> None:
+    def __init__(self, data: Store, path: List[str],
+                 parent: 'CollectionReference') -> None:
         self._data = data
         self._path = path
+        self.parent = parent
 
     @property
     def id(self):
@@ -58,7 +60,7 @@ class DocumentReference:
         new_path = self._path + [name]
         if name not in document:
             set_by_path(self._data, new_path, {})
-        return CollectionReference(self._data, new_path)
+        return CollectionReference(self._data, new_path, parent=self)
 
 
 class Query:
@@ -141,9 +143,11 @@ class Query:
 
 
 class CollectionReference:
-    def __init__(self, data: Store, path: List[str]) -> None:
+    def __init__(self, data: Store, path: List[str],
+                 parent: Optional[DocumentReference] = None) -> None:
         self._data = data
         self._path = path
+        self.parent = parent
 
     def document(self, name: Optional[str] = None) -> DocumentReference:
         collection = get_by_path(self._data, self._path)
@@ -152,7 +156,7 @@ class CollectionReference:
         new_path = self._path + [name]
         if name not in collection:
             set_by_path(self._data, new_path, {})
-        return DocumentReference(self._data, new_path)
+        return DocumentReference(self._data, new_path, parent=self)
 
     def get(self) -> Iterable[DocumentSnapshot]:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',

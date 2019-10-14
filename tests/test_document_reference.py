@@ -119,3 +119,13 @@ class TestDocumentReference(TestCase):
         fs.collection('foo').document('first').delete()
         doc = fs.collection('foo').document('first').get()
         self.assertEqual(False, doc.exists)
+
+    def test_document_parent(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        coll = fs.collection('foo')
+        document = coll.document('first')
+        self.assertIs(document.parent, coll)
+
