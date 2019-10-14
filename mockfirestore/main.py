@@ -132,32 +132,23 @@ class Query:
             for field_filter in field_filters:
                 self._add_field_filter(*field_filter)
 
-    @property
-    def _data(self) -> OrderedDict:
-        data = get_by_path(self.parent._data, self.parent._path)
-        if not isinstance(data, OrderedDict):
-            data = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
+    def stream(self) -> Iterator[DocumentSnapshot]:
+        doc_snapshots = self.parent.stream()
 
         for field, compare, value in self._field_filters:
-            data = OrderedDict((k, v) for k, v in data.items() if compare(v[field], value))
+            doc_snapshots = (doc_snapshot for doc_snapshot in doc_snapshots
+                             if compare(doc_snapshot.to_dict()[field], value))
 
         if self.orders:
             for key, direction in self.orders:
-                sorted_items = sorted(data.items(),
-                                      key=lambda doc: doc[1][key],
-                                      reverse=direction == 'DESCENDING')
-                data = OrderedDict(sorted_items)
+                doc_snapshots = sorted(doc_snapshots,
+                                       key=lambda doc: doc.to_dict()[key],
+                                       reverse=direction == 'DESCENDING')
 
         if self._limit:
-            limited = islice(data.items(), self._limit)
-            data = OrderedDict(limited)
+            doc_snapshots = islice(doc_snapshots, self._limit)
 
-        return data
-
-    def stream(self) -> Iterator[DocumentSnapshot]:
-        doc_refs = self.parent.list_documents()
-        return (DocumentSnapshot(doc_ref, doc) for doc_ref, doc
-                in zip(doc_refs, self._data.values()))
+        return iter(doc_snapshots)
 
     def get(self) -> Iterator[DocumentSnapshot]:
         warnings.warn('Query.get is deprecated, please use Query.stream',
