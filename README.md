@@ -34,6 +34,7 @@ mock_db = MockFirestore()
 mock_db.collection('users')
 mock_db.collection('users').get()
 mock_db.collection('users').list_documents()
+mock_db.collection('users').stream()
 
 # Documents
 mock_db.collection('users').document()
@@ -54,6 +55,9 @@ mock_db.collection('users').document('alovelace').update({
 })
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
+
+mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'},
+                                'alovelace')
 
 # Querying
 mock_db.collection('users').document('alovelace').order_by('born').get()
