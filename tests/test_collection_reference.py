@@ -144,7 +144,7 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').start_at('second').stream())
+        docs = list(fs.collection('foo').order_by("id").start_at({"id": 2}).stream())
         self.assertEqual({'id': 2}, docs[0].to_dict())
         self.assertEqual(2, len(docs))
 

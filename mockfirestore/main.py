@@ -117,18 +117,15 @@ class DocumentReference:
 class Query:
     def __init__(self, parent: 'CollectionReference', projection=None,
                  field_filters=(), orders=(), limit=None, offset=None,
-                 start_at=None, start_after=None, end_before=None, 
-                 end_at=None, all_descendants=False) -> None:
+                 start_at=None, end_at=None, all_descendants=False) -> None:
         self.parent = parent
         self.projection = projection
         self._field_filters = []
         self.orders = list(orders)
         self._limit = limit
         self.offset = offset
-        self._start_at = start_at
-        self._start_after = start_after
-        self._end_before = end_before
-        self._end_at = end_at
+        self.start_at = start_at
+        self.end_at = end_at
         self.all_descendants = all_descendants
 
         if field_filters:
@@ -147,21 +144,14 @@ class Query:
                 doc_snapshots = sorted(doc_snapshots,
                                        key=lambda doc: doc.to_dict()[key],
                                        reverse=direction == 'DESCENDING')
+            if self.start_at:
+                doc_snapshots = self._cursor_helper(self.start_at[0], doc_snapshots, self.start_at[1], True, keys)
+
+            if self.end_at:
+                doc_snapshots = self.end_before(self.end_at[0], doc_snapshots, self.end_at[1], False, keys)
 
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
-
-        if self._start_at:
-            doc_snapshots = self.start_at(doc_snapshots)
-        
-        if self._start_after:
-            doc_snapshots = self.start_after(doc_snapshots)
-
-        if self._end_before:
-            doc_snapshots = self.end_before(doc_snapshots)
-
-        if self._end_at:
-            doc_snapshots = self.end_at(doc_snapshots)
 
         return iter(doc_snapshots)
 
@@ -210,6 +200,25 @@ class Query:
             if doc.reference.id == self._end_at:
                 return docs[0:idx+1:]
     
+    def _cursor_helper(self, document_fields: dict, snapshot: Iterator[List], before: bool, start: bool, keys: list) -> 'Query':
+        docs = deepcopy(snapshot)
+        for idx, doc in enumerate(snapshot):
+            index = None
+            for k,v in document_fields.items():
+                if doc[k] == v:
+                    index = idx
+                else:
+                    index = None
+            if index:
+                if before and start:
+                    return islice(docs, index, None, None)
+                elif not before and start:
+                    return islice(docs, index+1, None, None)
+                elif before and not start:
+                    return islice(docs, 0, index+1, None)
+                elif not before and not start:
+                    return islice(docs, 0, index, None)
+
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
             return lambda x, y: x == y
@@ -269,20 +278,20 @@ class CollectionReference:
         query = Query(self, limit=limit_amount)
         return query
 
-    def start_at(self, key: str) -> Query:
-        query = Query(self, start_at=key)
+    def start_at(self, document_fields: dict) -> Query:
+        query = Query(self, start_at=(document_fields, True))
         return query
 
-    def start_after(self, key: str) -> Query:
-        query = Query(self, start_after=key)
-        return query
-
-    def end_before(self, key: str) -> Query:
-        query = Query(self, end_before=key)
+    def start_after(self, document_fields: dict) -> Query:
+        query = Query(self, start_after=(document_fields, False))
         return query
     
-    def end_at(self, key: str) -> Query:
-        query = Query(self, end_at=key)
+    def end_at(self, document_fields: dict) -> Query:
+        query = Query(self, end_at=(document_fields, True))
+        return query
+
+    def end_before(self, document_fields: dict) -> Query:
+        query = Query(self, end_before=(document_fields, False))
         return query
     
     def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
