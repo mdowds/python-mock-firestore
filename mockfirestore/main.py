@@ -117,15 +117,18 @@ class DocumentReference:
 class Query:
     def __init__(self, parent: 'CollectionReference', projection=None,
                  field_filters=(), orders=(), limit=None, offset=None,
-                 start_at=None, end_at=None, all_descendants=False) -> None:
+                 start_at=None, start_after=None, end_before=None, 
+                 end_at=None, all_descendants=False) -> None:
         self.parent = parent
         self.projection = projection
         self._field_filters = []
         self.orders = list(orders)
         self._limit = limit
         self.offset = offset
-        self.start_at = start_at
-        self.end_at = end_at
+        self._start_at = start_at
+        self._start_after = start_after
+        self._end_before = end_before
+        self._end_at = end_at
         self.all_descendants = all_descendants
 
         if field_filters:
@@ -147,6 +150,18 @@ class Query:
 
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
+
+        if self._start_at:
+            doc_snapshots = self.start_at(doc_snapshots)
+        
+        if self._start_after:
+            doc_snapshots = self.start_after(doc_snapshots)
+
+        if self._end_before:
+            doc_snapshots = self.end_before(doc_snapshots)
+
+        if self._end_at:
+            doc_snapshots = self.end_at(doc_snapshots)
 
         return iter(doc_snapshots)
 
@@ -171,6 +186,30 @@ class Query:
         self._limit = limit_amount
         return self
 
+    def start_at(self, snapshot: Iterator[List]) -> 'Query':
+        docs = [doc for doc in snapshot]
+        for idx, doc in enumerate(docs):
+            if doc.reference.id == self._start_at:
+                return docs[idx::]
+
+    def start_after(self, snapshot: Iterator[List]) -> 'Query':
+        docs = [doc for doc in snapshot]
+        for idx, doc in enumerate(docs):
+            if doc.reference.id == self._start_after:
+                return docs[idx+1::]
+
+    def end_before(self, snapshot: Iterator[List]) -> 'Query':
+        docs = [doc for doc in snapshot]
+        for idx, doc in enumerate(docs):
+            if doc.reference.id == self._end_before:
+                return docs[0:idx:]
+
+    def end_at(self, snapshot: Iterator[List]) -> 'Query':
+        docs = [doc for doc in snapshot]
+        for idx, doc in enumerate(docs):
+            if doc.reference.id == self._end_at:
+                return docs[0:idx+1:]
+    
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
             return lambda x, y: x == y
@@ -230,6 +269,22 @@ class CollectionReference:
         query = Query(self, limit=limit_amount)
         return query
 
+    def start_at(self, key: str) -> Query:
+        query = Query(self, start_at=key)
+        return query
+
+    def start_after(self, key: str) -> Query:
+        query = Query(self, start_after=key)
+        return query
+
+    def end_before(self, key: str) -> Query:
+        query = Query(self, end_before=key)
+        return query
+    
+    def end_at(self, key: str) -> Query:
+        query = Query(self, end_at=key)
+        return query
+    
     def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
         docs = []
         for key in get_by_path(self._data, self._path):
