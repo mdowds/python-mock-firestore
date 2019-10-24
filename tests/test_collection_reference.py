@@ -144,7 +144,7 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').order_by("id").start_at({"id": 2}).stream())
+        docs = list(fs.collection('foo').order_by('id').start_at({'id': 2}).stream())
         self.assertEqual({'id': 2}, docs[0].to_dict())
         self.assertEqual(2, len(docs))
 
@@ -155,7 +155,7 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').start_after('second').stream())
+        docs = list(fs.collection('foo').order_by('id').start_after({'id': 2}).stream())
         self.assertEqual({'id': 3}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
@@ -166,7 +166,7 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').end_before('second').stream())
+        docs = list(fs.collection('foo').order_by('id').end_before({'id': 2}).stream())
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
@@ -177,7 +177,7 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').end_at('second').stream())
+        docs = list(fs.collection('foo').order_by('id').end_at({'id': 2}).stream())
         self.assertEqual({'id': 2}, docs[1].to_dict())
         self.assertEqual(2, len(docs))
     
