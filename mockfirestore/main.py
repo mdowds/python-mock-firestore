@@ -197,7 +197,7 @@ class Query:
         for idx, doc in enumerate(doc_snapshot):
             index = None
             for k,v in document_fields.items():
-                if doc.to_dict()[k] == v:
+                if doc.to_dict().get(k, None) == v:
                     index = idx
                 else:
                     index = None
