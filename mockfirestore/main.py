@@ -192,7 +192,7 @@ class Query:
         self._end_at = (document_fields, False)
         return self
     
-    def _cursor_helper(self, document_fields: dict, doc_snapshot: Iterator[List], before: bool, start: bool) -> 'Query':
+    def _cursor_helper(self, document_fields: dict, doc_snapshot: Iterator[List], before: bool, start: bool):
         docs = deepcopy(doc_snapshot)
         for idx, doc in enumerate(doc_snapshot):
             index = None
