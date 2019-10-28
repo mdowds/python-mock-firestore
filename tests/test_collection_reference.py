@@ -150,7 +150,6 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 3}, docs[1].to_dict())
         self.assertEqual(2, len(docs))
 
-
     def test_collection_orderby_offset(self):
         fs = MockFirestore()
         fs._data = {'foo': {
