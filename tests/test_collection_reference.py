@@ -137,6 +137,33 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
+    def test_collection_offset(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').offset(1).stream())
+
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual({'id': 3}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
+
+
+    def test_collection_orderby_offset(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by("id").offset(1).stream())
+
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual({'id': 3}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
+
     def test_collection_start_at(self):
         fs = MockFirestore()
         fs._data = {'foo': {

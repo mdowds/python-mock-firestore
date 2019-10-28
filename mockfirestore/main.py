@@ -127,7 +127,7 @@ class Query:
         self._field_filters = []
         self.orders = list(orders)
         self._limit = limit
-        self.offset = offset
+        self._offset = offset
         self._start_at = start_at
         self._end_at = end_at
         self.all_descendants = all_descendants
@@ -156,6 +156,9 @@ class Query:
             document_fields, before = self._end_at
             doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, False)
 
+        if self._offset:
+            doc_snapshots = islice(doc_snapshots, self._offset, None)
+
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
 
@@ -180,6 +183,10 @@ class Query:
 
     def limit(self, limit_amount: int) -> 'Query':
         self._limit = limit_amount
+        return self
+
+    def offset(self, offset_amount: int) -> 'Query':
+        self._offset = offset_amount
         return self
 
     def start_at(self, document_fields: dict) -> 'Query':
@@ -275,6 +282,10 @@ class CollectionReference:
 
     def limit(self, limit_amount: int) -> Query:
         query = Query(self, limit=limit_amount)
+        return query
+
+    def offset(self, offset: int) -> Query:
+        query = Query(self, offset=offset)
         return query
 
     def start_at(self, document_fields: dict) -> Query:
