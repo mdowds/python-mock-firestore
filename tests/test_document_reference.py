@@ -9,8 +9,9 @@ class TestDocumentReference(TestCase):
         fs._data = {'foo': {
             'first': {'id': 1}
         }}
-        doc = fs.collection('foo').document('first').get().to_dict()
-        self.assertEqual({'id': 1}, doc)
+        doc = fs.collection('foo').document('first').get()
+        self.assertEqual({'id': 1}, doc.to_dict())
+        self.assertEqual('first', doc.id)
 
     def test_document_get_documentIdEqualsKey(self):
         fs = MockFirestore()

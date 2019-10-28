@@ -5,7 +5,7 @@ from datetime import datetime as dt
 from collections import OrderedDict
 from copy import deepcopy
 from functools import reduce
-from itertools import islice
+from itertools import islice, tee
 from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional,
                     Iterator, Iterable)
 import warnings
@@ -66,6 +66,10 @@ class DocumentSnapshot:
     def __init__(self, reference: 'DocumentReference', data: Document) -> None:
         self.reference = reference
         self._doc = deepcopy(data)
+
+    @property
+    def id(self):
+        return self.reference.id
 
     @property
     def exists(self) -> bool:
@@ -144,11 +148,13 @@ class Query:
                 doc_snapshots = sorted(doc_snapshots,
                                        key=lambda doc: doc.to_dict()[key],
                                        reverse=direction == 'DESCENDING')
-            if self._start_at:
-                doc_snapshots = self._cursor_helper(self._start_at[0], doc_snapshots, self._start_at[1], True)
+        if self._start_at:
+            document_fields, before = self._start_at
+            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, True)
 
-            if self._end_at:
-                doc_snapshots = self._cursor_helper(self._end_at[0], doc_snapshots, self._end_at[1], False)
+        if self._end_at:
+            document_fields, before = self._end_at
+            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, False)
 
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
@@ -192,8 +198,9 @@ class Query:
         self._end_at = (document_fields, False)
         return self
     
-    def _cursor_helper(self, document_fields: dict, doc_snapshot: Iterator[List], before: bool, start: bool):
-        docs = deepcopy(doc_snapshot)
+    def _apply_cursor(self, document_fields: dict, doc_snapshot: Iterator[List], 
+                      before: bool, start: bool) -> Iterator[DocumentSnapshot]:
+        docs, doc_snapshot = tee(doc_snapshot)
         for idx, doc in enumerate(doc_snapshot):
             index = None
             for k,v in document_fields.items():
