@@ -273,7 +273,6 @@ class MockFirestore:
             yield doc_ref.get()
 
 
-
 def get_by_path(data: Dict[str, T], path: Sequence[str]) -> T:
     """Access a nested object in root by item sequence."""
     return reduce(operator.getitem, path, data)
