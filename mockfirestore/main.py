@@ -141,7 +141,7 @@ class Query:
 
         for field, compare, value in self._field_filters:
             doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
-                             if compare(doc_snapshot.to_dict()[field], value)]
+                             if compare(doc_snapshot.to_dict().get(field), value)]
 
         if self.orders:
             for key, direction in self.orders:

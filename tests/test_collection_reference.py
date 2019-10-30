@@ -55,7 +55,7 @@ class TestCollectionReference(TestCase):
         fs = MockFirestore()
         fs._data = {'foo': {
             'first': {'valid': True},
-            'second': {'valid': False}
+            'second': {'gumby': False}
         }}
 
         docs = list(fs.collection('foo').where('valid', '==', True).stream())
