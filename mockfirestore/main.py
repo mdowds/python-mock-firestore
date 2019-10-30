@@ -241,21 +241,10 @@ class CollectionReference:
             yield doc_snapshot
 
 
-class MockFirestoreAPI:
-    # no-op to be compatible with the Transaction API
-    def commit(self, database, writes, transaction=None,
-               retry=None, timeout=None, metadata=None):
-        ...
-
-
 class MockFirestore:
 
     def __init__(self) -> None:
         self._data = {}
-        # for compatibility with Transaction API
-        self._database_string = ""
-        self._firestore_api = MockFirestoreAPI()
-        self._rpc_metadata = None
 
     def collection(self, name: str) -> CollectionReference:
         if name not in self._data:
