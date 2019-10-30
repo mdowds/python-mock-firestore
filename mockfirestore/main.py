@@ -132,7 +132,7 @@ class Query:
             for field_filter in field_filters:
                 self._add_field_filter(*field_filter)
 
-    def stream(self) -> Iterator[DocumentSnapshot]:
+    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
         doc_snapshots = self.parent.stream()
 
         for field, compare, value in self._field_filters:
