@@ -2,7 +2,6 @@ import operator
 import random
 import string
 from datetime import datetime as dt
-from collections import OrderedDict
 from copy import deepcopy
 from functools import reduce
 from itertools import islice
@@ -246,7 +245,7 @@ class MockFirestoreAPI:
     # no-op to be compatible with the Transaction API
     def commit(self, database, writes, transaction=None,
                retry=None, timeout=None, metadata=None):
-        pass
+        ...
 
 
 class MockFirestore:
@@ -265,6 +264,14 @@ class MockFirestore:
 
     def reset(self):
         self._data = {}
+
+    @staticmethod
+    def get_all(references: Iterable[DocumentReference],
+                field_paths=None,
+                transaction=None) -> Iterable[DocumentSnapshot]:
+        for doc_ref in set(references):
+            yield doc_ref.get()
+
 
 
 def get_by_path(data: Dict[str, T], path: Sequence[str]) -> T:
