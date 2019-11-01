@@ -1,8 +1,15 @@
 from functools import partial
+import random
 from typing import Iterable, Callable
+from string import ascii_letters, digits
 from .main import MockFirestore, DocumentReference, DocumentSnapshot, Query, Timestamp
 
 MAX_ATTEMPTS = 5
+ALPHABET = list(ascii_letters) + list(digits)
+_MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
+_CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
+_CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
+_CANT_COMMIT = _MISSING_ID_TEMPLATE.format("committed")
 
 
 class MockWriteResult:
@@ -33,15 +40,23 @@ class Transaction:
         return self._id
 
     def _begin(self, retry_id=None):
-        pass
+        # generate a random ID to set the transaction as in_progress
+        self._id = ' '.join(random.choices(ALPHABET, k=10))
 
     def _clean_up(self):
         self._write_ops.clear()
+        self._id = None
 
     def _rollback(self):
+        if not self.in_progress:
+            raise ValueError(_CANT_ROLLBACK)
+
         self._clean_up()
 
     def _commit(self) -> Iterable[MockWriteResult]:
+        if not self.in_progress:
+            raise ValueError(_CANT_COMMIT)
+
         results = []
         for write_op in self._write_ops:
             write_op()
