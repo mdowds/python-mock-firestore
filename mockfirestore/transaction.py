@@ -41,7 +41,7 @@ class Transaction:
 
     def _begin(self, retry_id=None):
         # generate a random ID to set the transaction as in_progress
-        self._id = ' '.join(random.choices(ALPHABET, k=10))
+        self._id = ''.join(random.choices(ALPHABET, k=10))
 
     def _clean_up(self):
         self._write_ops.clear()
