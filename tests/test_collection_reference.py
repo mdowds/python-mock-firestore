@@ -102,6 +102,27 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'count': 1}, docs[0].to_dict())
         self.assertEqual({'count': 5}, docs[1].to_dict())
 
+    def test_collection_whereMissingField(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'count': 1},
+            'second': {'count': 5}
+        }}
+
+        docs = list(fs.collection('foo').where('no_field', '==', 1).stream())
+        self.assertEqual(len(docs), 0)
+
+    def test_collection_whereNestedField(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'nested': {'a': 1}},
+            'second': {'nested': {'a': 2}}
+        }}
+
+        docs = list(fs.collection('foo').where('nested.a', '==', 1).stream())
+        self.assertEqual(len(docs), 1)
+        self.assertEqual({'nested': {'a': 1}}, docs[0].to_dict())
+
     def test_collection_orderBy(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -311,4 +332,3 @@ class TestCollectionReference(TestCase):
 
         with self.assertRaises(AlreadyExists):
             fs.collection('foo').add(doc_content)
-
