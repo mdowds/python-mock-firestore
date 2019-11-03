@@ -1,4 +1,6 @@
 from copy import deepcopy
+from functools import reduce
+import operator
 from typing import List, Dict, Any
 from mockfirestore._helpers import Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
 
@@ -23,6 +25,12 @@ class DocumentSnapshot:
     def create_time(self) -> Timestamp:
         timestamp = Timestamp.from_now()
         return timestamp
+
+    def _get_by_field_path(self, field_path: str) -> Any:
+        try:
+            return reduce(operator.getitem, field_path.split('.'), self._doc)
+        except KeyError:
+            return None
 
 
 class DocumentReference:
@@ -58,4 +66,3 @@ class DocumentReference:
         if name not in document:
             set_by_path(self._data, new_path, {})
         return CollectionReference(self._data, new_path, parent=self)
-
