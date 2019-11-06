@@ -82,6 +82,11 @@ class DocumentSnapshot:
     def update_time(self) -> Timestamp:
         return self.create_time
 
+    @property
+    def read_time(self) -> Timestamp:
+        timestamp = Timestamp.from_now()
+        return timestamp
+
 
 class DocumentReference:
     def __init__(self, data: Store, path: List[str],
