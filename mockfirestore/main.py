@@ -9,6 +9,8 @@ from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optiona
                     Iterator, Iterable)
 import warnings
 
+ALPHABET = list(string.ascii_letters) + list(string.digits)
+
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
 Document = Dict[str, Any]
@@ -65,6 +67,11 @@ class DocumentSnapshot:
     def __init__(self, reference: 'DocumentReference', data: Document) -> None:
         self.reference = reference
         self._doc = deepcopy(data)
+        self._id = ''.join(random.choices(ALPHABET, k=10))
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @property
     def exists(self) -> bool:

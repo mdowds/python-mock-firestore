@@ -37,3 +37,34 @@ class TestDocumentSnapshot(TestCase):
         doc_snapshot = doc_ref.get()
         self.assertIs(doc_ref, doc_snapshot.reference)
 
+    def test_documentSnapshot_id(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertIsInstance(doc.id, str)
+
+    def test_documentSnapshot_create_time(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertIsNotNone(doc.create_time)
+
+    def test_documentSnapshot_update_time(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertIsNotNone(doc.update_time)
+
+    def test_documentSnapshot_read_time(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertIsNotNone(doc.read_time)
