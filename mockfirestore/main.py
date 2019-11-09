@@ -5,7 +5,7 @@ from datetime import datetime as dt
 from collections import OrderedDict
 from copy import deepcopy
 from functools import reduce
-from itertools import islice
+from itertools import islice, tee
 from typing import (Dict, Any, List, Tuple, TypeVar, Sequence, Callable, Optional,
                     Iterator, Iterable)
 import warnings
@@ -68,6 +68,10 @@ class DocumentSnapshot:
         self._doc = deepcopy(data)
 
     @property
+    def id(self):
+        return self.reference.id
+
+    @property
     def exists(self) -> bool:
         return self._doc != {}
 
@@ -123,9 +127,9 @@ class Query:
         self._field_filters = []
         self.orders = list(orders)
         self._limit = limit
-        self.offset = offset
-        self.start_at = start_at
-        self.end_at = end_at
+        self._offset = offset
+        self._start_at = start_at
+        self._end_at = end_at
         self.all_descendants = all_descendants
 
         if field_filters:
@@ -137,13 +141,23 @@ class Query:
 
         for field, compare, value in self._field_filters:
             doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
-                             if compare(doc_snapshot.to_dict()[field], value)]
+                             if compare(doc_snapshot.to_dict().get(field), value)]
 
         if self.orders:
             for key, direction in self.orders:
                 doc_snapshots = sorted(doc_snapshots,
                                        key=lambda doc: doc.to_dict()[key],
                                        reverse=direction == 'DESCENDING')
+        if self._start_at:
+            document_fields, before = self._start_at
+            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, True)
+
+        if self._end_at:
+            document_fields, before = self._end_at
+            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, False)
+
+        if self._offset:
+            doc_snapshots = islice(doc_snapshots, self._offset, None)
 
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
@@ -170,6 +184,46 @@ class Query:
     def limit(self, limit_amount: int) -> 'Query':
         self._limit = limit_amount
         return self
+
+    def offset(self, offset_amount: int) -> 'Query':
+        self._offset = offset_amount
+        return self
+
+    def start_at(self, document_fields: dict) -> 'Query':
+        self._start_at = (document_fields, True)
+        return self
+
+    def start_after(self, document_fields: dict) -> 'Query':
+        self._start_at = (document_fields, False)
+        return self
+
+    def end_at(self, document_fields: dict) -> 'Query':
+        self._end_at = (document_fields, True)
+        return self
+
+    def end_before(self, document_fields: dict) -> 'Query':
+        self._end_at = (document_fields, False)
+        return self
+    
+    def _apply_cursor(self, document_fields: dict, doc_snapshot: Iterator[List], 
+                      before: bool, start: bool) -> Iterator[DocumentSnapshot]:
+        docs, doc_snapshot = tee(doc_snapshot)
+        for idx, doc in enumerate(doc_snapshot):
+            index = None
+            for k,v in document_fields.items():
+                if doc.to_dict().get(k, None) == v:
+                    index = idx
+                else:
+                    index = None
+            if index:
+                if before and start:
+                    return islice(docs, index, None, None)
+                elif not before and start:
+                    return islice(docs, index+1, None, None)
+                elif before and not start:
+                    return islice(docs, 0, index+1, None)
+                elif not before and not start:
+                    return islice(docs, 0, index, None)
 
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
         if op == '==':
@@ -230,6 +284,26 @@ class CollectionReference:
         query = Query(self, limit=limit_amount)
         return query
 
+    def offset(self, offset: int) -> Query:
+        query = Query(self, offset=offset)
+        return query
+
+    def start_at(self, document_fields: dict) -> Query:
+        query = Query(self, start_at=(document_fields, True))
+        return query
+
+    def start_after(self, document_fields: dict) -> Query:
+        query = Query(self, start_at=(document_fields, False))
+        return query
+    
+    def end_at(self, document_fields: dict) -> Query:
+        query = Query(self, end_at=(document_fields, True))
+        return query
+
+    def end_before(self, document_fields: dict) -> Query:
+        query = Query(self, end_at=(document_fields, False))
+        return query
+    
     def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
         docs = []
         for key in get_by_path(self._data, self._path):
