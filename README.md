@@ -35,11 +35,15 @@ mock_db.collection('users')
 mock_db.collection('users').get()
 mock_db.collection('users').list_documents()
 mock_db.collection('users').stream()
+mock_db.collection('users').start_after({'id': 'alovelace'}).stream()
+mock_db.collection('users').end_before({'id': 'alovelace'}).stream()
+mock_db.collection('users').end_at({'id': 'alovelace'}).stream()
 
 # Documents
 mock_db.collection('users').document()
 mock_db.collection('users').document('alovelace')
 mock_db.collection('users').document('alovelace').id
+mock_db.collection('users').document('alovelace').parent
 mock_db.collection('users').document('alovelace').get()
 mock_db.collection('users').document('alovelace').get().exists
 mock_db.collection('users').document('alovelace').get().to_dict()
@@ -69,3 +73,10 @@ mock_db.collection('users').document('alovelace').where('born', '>', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '<=', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '>=', 1815).get()
 ```
+
+## Contributors
+
+* [Matt Dowds](https://github.com/mdowds)
+* [Chris Tippett](https://github.com/christippett)
+* [Anton Melnikov](https://github.com/notnami)
+* [Ben Riggleman](https://github.com/briggleman)
