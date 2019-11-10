@@ -80,3 +80,4 @@ mock_db.collection('users').document('alovelace').where('born', '>=', 1815).get(
 * [Chris Tippett](https://github.com/christippett)
 * [Anton Melnikov](https://github.com/notnami)
 * [Ben Riggleman](https://github.com/briggleman)
+* [Steve Atwell](https://github.com/satwell)
