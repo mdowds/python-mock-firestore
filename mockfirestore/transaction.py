@@ -2,7 +2,6 @@ from functools import partial
 import random
 from typing import Iterable, Callable
 from mockfirestore._helpers import generate_random_string, Timestamp
-from mockfirestore.client import MockFirestore
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.query import Query
 
@@ -23,7 +22,7 @@ class Transaction:
     This mostly follows the model from
     https://googleapis.dev/python/firestore/latest/transaction.html
     """
-    def __init__(self, client: MockFirestore,
+    def __init__(self, client,
                  max_attempts=MAX_ATTEMPTS, read_only=False):
         self._client = client
         self._max_attempts = max_attempts
