@@ -13,7 +13,7 @@ _CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
 _CANT_COMMIT = _MISSING_ID_TEMPLATE.format("committed")
 
 
-class MockWriteResult:
+class WriteResult:
     def __init__(self):
         self.update_time = Timestamp.from_now()
 
@@ -54,14 +54,14 @@ class Transaction:
 
         self._clean_up()
 
-    def _commit(self) -> Iterable[MockWriteResult]:
+    def _commit(self) -> Iterable[WriteResult]:
         if not self.in_progress:
             raise ValueError(_CANT_COMMIT)
 
         results = []
         for write_op in self._write_ops:
             write_op()
-            results.append(MockWriteResult())
+            results.append(WriteResult())
         self.write_results = results
         self._clean_up()
         return results
