@@ -1,11 +1,12 @@
 from functools import partial
 import random
 from typing import Iterable, Callable
-from string import ascii_letters, digits
-from .main import MockFirestore, DocumentReference, DocumentSnapshot, Query, Timestamp
+from mockfirestore._helpers import generate_random_string, Timestamp
+from mockfirestore.client import MockFirestore
+from mockfirestore.document import DocumentReference, DocumentSnapshot
+from mockfirestore.query import Query
 
 MAX_ATTEMPTS = 5
-ALPHABET = list(ascii_letters) + list(digits)
 _MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
 _CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
 _CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
@@ -41,7 +42,7 @@ class Transaction:
 
     def _begin(self, retry_id=None):
         # generate a random ID to set the transaction as in_progress
-        self._id = ''.join(random.choices(ALPHABET, k=10))
+        self._id = generate_random_string()
 
     def _clean_up(self):
         self._write_ops.clear()

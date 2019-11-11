@@ -1,7 +1,6 @@
 from unittest import TestCase
 
-from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot
-from mockfirestore.main import AlreadyExists
+from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot, AlreadyExists
 
 
 class TestCollectionReference(TestCase):
@@ -55,7 +54,7 @@ class TestCollectionReference(TestCase):
         fs = MockFirestore()
         fs._data = {'foo': {
             'first': {'valid': True},
-            'second': {'valid': False}
+            'second': {'gumby': False}
         }}
 
         docs = list(fs.collection('foo').where('valid', '==', True).stream())
@@ -103,6 +102,27 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'count': 1}, docs[0].to_dict())
         self.assertEqual({'count': 5}, docs[1].to_dict())
 
+    def test_collection_whereMissingField(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'count': 1},
+            'second': {'count': 5}
+        }}
+
+        docs = list(fs.collection('foo').where('no_field', '==', 1).stream())
+        self.assertEqual(len(docs), 0)
+
+    def test_collection_whereNestedField(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'nested': {'a': 1}},
+            'second': {'nested': {'a': 2}}
+        }}
+
+        docs = list(fs.collection('foo').where('nested.a', '==', 1).stream())
+        self.assertEqual(len(docs), 1)
+        self.assertEqual({'nested': {'a': 1}}, docs[0].to_dict())
+
     def test_collection_orderBy(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -136,6 +156,120 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').limit(1).stream())
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
+
+    def test_collection_offset(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').offset(1).stream())
+
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual({'id': 3}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
+
+    def test_collection_orderby_offset(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by("id").offset(1).stream())
+
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual({'id': 3}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
+
+    def test_collection_start_at(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').start_at({'id': 2}).stream())
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual(2, len(docs))
+    
+    def test_collection_start_at_order_by(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by('id').start_at({'id': 2}).stream())
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual(2, len(docs))
+
+    def test_collection_start_after(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').start_after({'id': 2}).stream())
+        self.assertEqual({'id': 3}, docs[0].to_dict())
+        self.assertEqual(1, len(docs))
+
+    def test_collection_start_after_order_by(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by('id').start_after({'id': 2}).stream())
+        self.assertEqual({'id': 3}, docs[0].to_dict())
+        self.assertEqual(1, len(docs))
+
+    def test_collection_end_before(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').end_before({'id': 2}).stream())
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual(1, len(docs))
+
+    def test_collection_end_before_order_by(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by('id').end_before({'id': 2}).stream())
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual(1, len(docs))
+
+    def test_collection_end_at(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').end_at({'id': 2}).stream())
+        self.assertEqual({'id': 2}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
+    
+    def test_collection_end_at_order_by(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3}
+        }}
+        docs = list(fs.collection('foo').order_by('id').end_at({'id': 2}).stream())
+        self.assertEqual({'id': 2}, docs[1].to_dict())
+        self.assertEqual(2, len(docs))
 
     def test_collection_limitAndOrderBy(self):
         fs = MockFirestore()
@@ -198,4 +332,3 @@ class TestCollectionReference(TestCase):
 
         with self.assertRaises(AlreadyExists):
             fs.collection('foo').add(doc_content)
-
