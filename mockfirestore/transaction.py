@@ -69,7 +69,7 @@ class Transaction:
                 references: Iterable[DocumentReference]) -> Iterable[DocumentSnapshot]:
         return self._client.get_all(references)
 
-    def get(self, ref_or_query):
+    def get(self, ref_or_query) -> Iterable[DocumentSnapshot]:
         if isinstance(ref_or_query, DocumentReference):
             return self._client.get_all([ref_or_query])
         elif isinstance(ref_or_query, Query):
