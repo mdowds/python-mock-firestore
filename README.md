@@ -72,6 +72,7 @@ mock_db.collection('users').document('alovelace').where('born', '<', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '>', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '<=', 1815).get()
 mock_db.collection('users').document('alovelace').where('born', '>=', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', 'in', [1815, 1900]).stream()
 ```
 
 ## Contributors
