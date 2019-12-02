@@ -123,6 +123,20 @@ class TestCollectionReference(TestCase):
         self.assertEqual(len(docs), 1)
         self.assertEqual({'nested': {'a': 1}}, docs[0].to_dict())
 
+    def test_collection_whereIn(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'field': 'a1'},
+            'second': {'field': 'a2'},
+            'third': {'field': 'a3'},
+            'fourth': {'field': 'a4'},
+        }}
+
+        docs = list(fs.collection('foo').where('field', 'in', ['a1', 'a3']).stream())
+        self.assertEqual(len(docs), 2)
+        self.assertEqual({'field': 'a1'}, docs[0].to_dict())
+        self.assertEqual({'field': 'a3'}, docs[1].to_dict())
+
     def test_collection_orderBy(self):
         fs = MockFirestore()
         fs._data = {'foo': {

@@ -124,3 +124,5 @@ class Query:
             return lambda x, y: x > y
         elif op == '>=':
             return lambda x, y: x >= y
+        elif op == 'in':
+            return lambda x, y: x in y
