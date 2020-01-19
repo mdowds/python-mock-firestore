@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from mockfirestore import MockFirestore
+from mockfirestore import MockFirestore, NotFound
 
 
 class TestDocumentReference(TestCase):
@@ -111,6 +111,13 @@ class TestDocumentReference(TestCase):
         fs.collection('foo').document('first').update({'id': 2})
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'id': 2}, doc)
+    
+    def test_document_update_documentDoesNotExist(self):
+        fs = MockFirestore()
+        with self.assertRaises(NotFound):
+            fs.collection('foo').document('nonexistent').update({'id': 2})
+        docsnap = fs.collection('foo').document('nonexistent').get()
+        self.assertFalse(docsnap.exists)
 
     def test_document_delete_documentDoesNotExistAfterDelete(self):
         fs = MockFirestore()
