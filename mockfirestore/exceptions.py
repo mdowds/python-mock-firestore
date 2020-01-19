@@ -13,5 +13,9 @@ class Conflict(ClientError):
     code = 409
 
 
+class NotFound(ClientError):
+    code = 404
+
+
 class AlreadyExists(Conflict):
     pass
