@@ -53,15 +53,15 @@ class DocumentReference:
 
     def set(self, data: Dict, merge=False):
         if merge:
-            self.update(data)
+            self.update(deepcopy(data))
         else:
-            set_by_path(self._data, self._path, data)
+            set_by_path(self._data, self._path, deepcopy(data))
 
     def update(self, data: Dict[str, Any]):
         document = get_by_path(self._data, self._path)
         if document == {}:
             raise NotFound('No document to update: {}'.format(self._path))
-        document.update(data)
+        document.update(deepcopy(data))
 
     def collection(self, name) -> 'CollectionReference':
         from mockfirestore.collection import CollectionReference

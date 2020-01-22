@@ -94,6 +94,15 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'new_id': 1}, doc)
 
+    def test_document_set_isolation(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {}}
+        doc_content = {'id': 'bar'}
+        fs.collection('foo').document('bar').set(doc_content)
+        doc_content['id'] = 'new value'
+        doc = fs.collection('foo').document('bar').get().to_dict()
+        self.assertEqual({'id': 'bar'}, doc)
+
     def test_document_update_addNewValue(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -118,6 +127,17 @@ class TestDocumentReference(TestCase):
             fs.collection('foo').document('nonexistent').update({'id': 2})
         docsnap = fs.collection('foo').document('nonexistent').get()
         self.assertFalse(docsnap.exists)
+
+    def test_document_update_isolation(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'nested': {'id': 1}}
+        }}
+        update_doc = {'nested': {'id': 2}}
+        fs.collection('foo').document('first').update(update_doc)
+        update_doc['nested']['id'] = 3
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'nested': {'id': 2}}, doc)
 
     def test_document_delete_documentDoesNotExistAfterDelete(self):
         fs = MockFirestore()
