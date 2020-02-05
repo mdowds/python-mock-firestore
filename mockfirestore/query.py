@@ -126,3 +126,7 @@ class Query:
             return lambda x, y: x >= y
         elif op == 'in':
             return lambda x, y: x in y
+        elif op == 'array_contains':
+            return lambda x, y: y in x
+        elif op == 'array_contains_any':
+            return lambda x, y: any([val in y for val in x])
