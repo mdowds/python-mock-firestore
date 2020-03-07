@@ -89,3 +89,4 @@ mock_db.collection('users').where('associates', 'array_contains_any', ['Charles 
 * [Ben Riggleman](https://github.com/briggleman)
 * [Steve Atwell](https://github.com/satwell)
 * [ahti123](https://github.com/ahti123)
+* [Billcountry Mwaniki](https://github.com/Billcountry)
