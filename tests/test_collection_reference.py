@@ -137,6 +137,31 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'field': 'a1'}, docs[0].to_dict())
         self.assertEqual({'field': 'a3'}, docs[1].to_dict())
 
+    def test_collection_whereArrayContains(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'field': ['val4']},
+            'second': {'field': ['val3', 'val2']},
+            'third': {'field': ['val3', 'val2', 'val1']}
+        }}
+
+        docs = list(fs.collection('foo').where('field', 'array_contains', 'val1').stream())
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].to_dict(), {'field': ['val3', 'val2', 'val1']})
+
+    def test_collection_whereArrayContainsAny(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'field': ['val4']},
+            'second': {'field': ['val3', 'val2']},
+            'third': {'field': ['val3', 'val2', 'val1']}
+        }}
+
+        contains_any_docs = list(fs.collection('foo').where('field', 'array_contains_any', ['val1', 'val4']).stream())
+        self.assertEqual(len(contains_any_docs), 2)
+        self.assertEqual({'field': ['val4']}, contains_any_docs[0].to_dict())
+        self.assertEqual({'field': ['val3', 'val2', 'val1']}, contains_any_docs[1].to_dict())
+
     def test_collection_orderBy(self):
         fs = MockFirestore()
         fs._data = {'foo': {
