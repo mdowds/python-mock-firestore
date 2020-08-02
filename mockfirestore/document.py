@@ -27,14 +27,17 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
+    def get(self, field_path: str) -> Any:
+        if not self._doc:
+            return None
+        else:
+            return reduce(operator.getitem, field_path.split('.'), self._doc)
+
     def _get_by_field_path(self, field_path: str) -> Any:
         try:
-            return reduce(operator.getitem, field_path.split('.'), self._doc)
+            return self.get(field_path)
         except KeyError:
             return None
-
-    def get(self, field_path):
-        return self._get_by_field_path(field_path)
 
 
 class DocumentReference:

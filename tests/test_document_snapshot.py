@@ -64,4 +64,15 @@ class TestDocumentSnapshot(TestCase):
             }}
         }}
         doc = fs.collection('foo').document('first').get()
-        self.assertIsNone(doc.get('contact.phone'))
+        with self.assertRaises(KeyError):
+            doc.get('contact.phone')
+
+    def test_documentSnapshot_get_in_an_non_existing_document(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'contact': {
+                'email': 'email@test.com'
+            }}
+        }}
+        doc = fs.collection('foo').document('second').get()
+        self.assertIsNone(doc.get('contact.email'))
