@@ -28,7 +28,7 @@ class DocumentSnapshot:
         return timestamp
 
     def get(self, field_path: str) -> Any:
-        if not self._doc:
+        if not self.exists:
             return None
         else:
             return reduce(operator.getitem, field_path.split('.'), self._doc)
