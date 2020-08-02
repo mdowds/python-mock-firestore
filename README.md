@@ -57,9 +57,6 @@ mock_db.collection('users').document('alovelace').set({
 mock_db.collection('users').document('alovelace').update({
     'born': 1815
 })
-mock_db.collection('users').document('alovelace').update({
-    'associates': ['Charles Babbage', 'Michael Faraday']
-})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
 
@@ -67,18 +64,15 @@ mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'},
                                 'alovelace')
 
 # Querying
-mock_db.collection('users').order_by('born').get()
-mock_db.collection('users').order_by('born', direction='DESCENDING').get()
-mock_db.collection('users').limit(5).get()
-mock_db.collection('users').where('born', '==', 1815).get()
-mock_db.collection('users').where('born', '<', 1815).get()
-mock_db.collection('users').where('born', '>', 1815).get()
-mock_db.collection('users').where('born', '<=', 1815).get()
-mock_db.collection('users').where('born', '>=', 1815).get()
-mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
-mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
-mock_db.collection('users').where('associates', 'array_contains', 'Charles Babbage').stream()
-mock_db.collection('users').where('associates', 'array_contains_any', ['Charles Babbage', 'Michael Faraday']).stream()
+mock_db.collection('users').document('alovelace').order_by('born').get()
+mock_db.collection('users').document('alovelace').order_by('born', direction='DESCENDING').get()
+mock_db.collection('users').document('alovelace').limit(5).get()
+mock_db.collection('users').document('alovelace').where('born', '==', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', '<', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', '>', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', '<=', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', '>=', 1815).get()
+mock_db.collection('users').document('alovelace').where('born', 'in', [1815, 1900]).stream()
 ```
 
 ## Contributors
@@ -89,4 +83,3 @@ mock_db.collection('users').where('associates', 'array_contains_any', ['Charles 
 * [Ben Riggleman](https://github.com/briggleman)
 * [Steve Atwell](https://github.com/satwell)
 * [ahti123](https://github.com/ahti123)
-* [Billcountry Mwaniki](https://github.com/Billcountry)

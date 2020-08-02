@@ -12,15 +12,6 @@ class TestDocumentSnapshot(TestCase):
         doc = fs.collection('foo').document('first').get()
         self.assertEqual({'id': 1}, doc.to_dict())
 
-    def test_documentSnapshot_toDict_isolation(self):
-        fs = MockFirestore()
-        fs._data = {'foo': {
-            'first': {'id': 1}
-        }}
-        doc_dict = fs.collection('foo').document('first').get().to_dict()
-        fs._data['foo']['first']['id'] = 2
-        self.assertEqual({'id': 1}, doc_dict)
-
     def test_documentSnapshot_exists(self):
         fs = MockFirestore()
         fs._data = {'foo': {
