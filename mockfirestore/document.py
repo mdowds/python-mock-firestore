@@ -33,6 +33,9 @@ class DocumentSnapshot:
         except KeyError:
             return None
 
+    def get(self, field_path):
+        return self._get_by_field_path(field_path)
+
 
 class DocumentReference:
     def __init__(self, data: Store, path: List[str],

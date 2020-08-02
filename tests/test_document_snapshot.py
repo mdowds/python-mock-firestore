@@ -46,3 +46,22 @@ class TestDocumentSnapshot(TestCase):
         doc_snapshot = doc_ref.get()
         self.assertIs(doc_ref, doc_snapshot.reference)
 
+    def test_documentSnapshot_get_by_existing_field_path(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'contact': {
+                'email': 'email@test.com'
+            }}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertEqual(doc.get('contact.email'), 'email@test.com')
+
+    def test_documentSnapshot_get_by_non_existing_field_path(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'contact': {
+                'email': 'email@test.com'
+            }}
+        }}
+        doc = fs.collection('foo').document('first').get()
+        self.assertIsNone(doc.get('contact.phone'))
