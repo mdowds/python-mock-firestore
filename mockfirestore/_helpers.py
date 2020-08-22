@@ -3,7 +3,7 @@ import random
 import string
 from datetime import datetime as dt
 from functools import reduce
-from typing import (Dict, Any, Tuple, TypeVar, Sequence)
+from typing import (Dict, Any, Tuple, TypeVar, Sequence, Iterator)
 
 T = TypeVar('T')
 KeyValuePair = Tuple[str, Dict[str, Any]]
@@ -51,3 +51,18 @@ class Timestamp:
     @property
     def nanos(self):
         return str(self._timestamp).split('.')[1]
+
+
+def get_document_iterator(document: Dict[str, Any], prefix: str = '') -> Iterator[Tuple[str, Any]]:
+    """
+    :returns: (dot-delimited path, value,)
+    """
+    for key, value in document.items():
+        if isinstance(value, dict):
+            for item in get_document_iterator(value, prefix=key):
+                yield item
+
+        if not prefix:
+            yield key, value
+        else:
+            yield '{}.{}'.format(prefix, key), value
