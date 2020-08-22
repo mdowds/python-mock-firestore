@@ -1,10 +1,17 @@
 language: python
 dist: xenial
-python:
-- 3.5
-- 3.6
-- 3.7
-script: python -m unittest discover tests -t /
+matrix:
+  include:
+    - python: 3.5
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+      sudo: required  # https://github.com/travis-ci/travis-ci/issues/9069
+install:
+  - pip install tox
+script: make test
 deploy:
   provider: pypi
   user: mdowds
