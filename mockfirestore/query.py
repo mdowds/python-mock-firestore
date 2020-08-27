@@ -103,6 +103,7 @@ class Query:
                     index = idx
                 else:
                     index = None
+                    break
             if index:
                 if before and start:
                     return islice(docs, index, None, None)
