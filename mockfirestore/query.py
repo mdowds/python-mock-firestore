@@ -104,7 +104,7 @@ class Query:
                 else:
                     index = None
                     break
-            if index:
+            if index is not None:
                 if before and start:
                     return islice(docs, index, None, None)
                 elif not before and start:

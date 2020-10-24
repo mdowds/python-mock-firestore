@@ -232,7 +232,7 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').start_at({'id': 2}).stream())
         self.assertEqual({'id': 2}, docs[0].to_dict())
         self.assertEqual(2, len(docs))
-    
+
     def test_collection_start_at_order_by(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -251,9 +251,9 @@ class TestCollectionReference(TestCase):
             'second': {'id': 2},
             'third': {'id': 3}
         }}
-        docs = list(fs.collection('foo').start_after({'id': 2}).stream())
-        self.assertEqual({'id': 3}, docs[0].to_dict())
-        self.assertEqual(1, len(docs))
+        docs = list(fs.collection('foo').start_after({'id': 1}).stream())
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual(2, len(docs))
 
     def test_collection_start_after_similar_objects(self):
         fs = MockFirestore()
@@ -310,7 +310,7 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').end_at({'id': 2}).stream())
         self.assertEqual({'id': 2}, docs[1].to_dict())
         self.assertEqual(2, len(docs))
-    
+
     def test_collection_end_at_order_by(self):
         fs = MockFirestore()
         fs._data = {'foo': {
