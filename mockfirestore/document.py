@@ -81,9 +81,9 @@ class DocumentReference:
         return CollectionReference(self._data, new_path, parent=self)
 
 
-def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]) -> Dict[str, Any]:
+def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
     """Handles special fields like INCREMENT."""
-    increments: Dict[str, int] = {}
+    increments = {}
 
     for key, value in get_document_iterator(data):
         if not value.__class__.__module__.startswith('google.cloud.firestore'):
