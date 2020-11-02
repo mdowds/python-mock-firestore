@@ -51,20 +51,12 @@ mock_db.collection('users').document('alovelace').set({
     'first': 'Ada',
     'last': 'Lovelace'
 })
-mock_db.collection('users').document('alovelace').set({
-    'first': 'Augusta Ada'
-}, merge=True)
-mock_db.collection('users').document('alovelace').update({
-    'born': 1815
-})
-mock_db.collection('users').document('alovelace').update({
-    'associates': ['Charles Babbage', 'Michael Faraday']
-})
+mock_db.collection('users').document('alovelace').set({'first': 'Augusta Ada'}, merge=True)
+mock_db.collection('users').document('alovelace').update({'born': 1815})
+mock_db.collection('users').document('alovelace').update({'associates': ['Charles Babbage', 'Michael Faraday']})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
-
-mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'},
-                                'alovelace')
+mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'}, 'alovelace')
 
 # Querying
 mock_db.collection('users').order_by('born').get()
@@ -90,3 +82,5 @@ mock_db.collection('users').where('associates', 'array_contains_any', ['Charles 
 * [Steve Atwell](https://github.com/satwell)
 * [ahti123](https://github.com/ahti123)
 * [Billcountry Mwaniki](https://github.com/Billcountry)
+* [Lucas Moura](https://github.com/lsantosdemoura)
+* [Kamil Romaszko](https://github.com/kromash)
