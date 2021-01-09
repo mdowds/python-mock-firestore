@@ -35,15 +35,14 @@ mock_db.collection('users')
 mock_db.collection('users').get()
 mock_db.collection('users').list_documents()
 mock_db.collection('users').stream()
-mock_db.collection('users').start_after({'id': 'alovelace'}).stream()
-mock_db.collection('users').end_before({'id': 'alovelace'}).stream()
-mock_db.collection('users').end_at({'id': 'alovelace'}).stream()
 
 # Documents
 mock_db.collection('users').document()
 mock_db.collection('users').document('alovelace')
 mock_db.collection('users').document('alovelace').id
 mock_db.collection('users').document('alovelace').parent
+mock_db.collection('users').document('alovelace').update_time
+mock_db.collection('users').document('alovelace').read_time
 mock_db.collection('users').document('alovelace').get()
 mock_db.collection('users').document('alovelace').get().exists
 mock_db.collection('users').document('alovelace').get().to_dict()
@@ -54,9 +53,11 @@ mock_db.collection('users').document('alovelace').set({
 mock_db.collection('users').document('alovelace').set({'first': 'Augusta Ada'}, merge=True)
 mock_db.collection('users').document('alovelace').update({'born': 1815})
 mock_db.collection('users').document('alovelace').update({'associates': ['Charles Babbage', 'Michael Faraday']})
+mock_db.collection('users').document('alovelace').update({'likes': firestore.Increment(1)})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
 mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'}, 'alovelace')
+mock_db.get_all([mock_db.collection('users').document('alovelace')])
 
 # Querying
 mock_db.collection('users').order_by('born').get()
@@ -71,6 +72,24 @@ mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
 mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
 mock_db.collection('users').where('associates', 'array_contains', 'Charles Babbage').stream()
 mock_db.collection('users').where('associates', 'array_contains_any', ['Charles Babbage', 'Michael Faraday']).stream()
+
+# Cursors
+mock_db.collection('users').start_after({'id': 'alovelace'}).stream()
+mock_db.collection('users').end_before({'id': 'alovelace'}).stream()
+mock_db.collection('users').end_at({'id': 'alovelace'}).stream()
+mock_db.collection('users').start_after(mock_db.collection('users').document('alovelace')).stream()
+
+# Transactions
+transaction = mock_db.transaction()
+transaction.id
+transaction.in_progress
+transaction.get(mock_db.collection('users').where('born', '==', 1815))
+transaction.get(mock_db.collection('users').document('alovelace'))
+transaction.get_all([mock_db.collection('users').document('alovelace')])
+transaction.set(mock_db.collection('users').document('alovelace'), {'born': 1815})
+transaction.update(mock_db.collection('users').document('alovelace'), {'born': 1815})
+transaction.delete(mock_db.collection('users').document('alovelace'))
+transaction.commit()
 ```
 
 ## Contributors
@@ -84,3 +103,6 @@ mock_db.collection('users').where('associates', 'array_contains_any', ['Charles 
 * [Billcountry Mwaniki](https://github.com/Billcountry)
 * [Lucas Moura](https://github.com/lsantosdemoura)
 * [Kamil Romaszko](https://github.com/kromash)
+* [Anna Melnikov](https://github.com/notnami)
+* [Carl Chipperfield](https://github.com/carl-chipperfield)
+* [Aaron Loo](https://github.com/domanchi)
