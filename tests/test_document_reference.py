@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from google.cloud import firestore
+
 from mockfirestore import MockFirestore, NotFound
 
 
@@ -138,6 +140,45 @@ class TestDocumentReference(TestCase):
         update_doc['nested']['id'] = 3
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'nested': {'id': 2}}, doc)
+
+    def test_document_update_transformerIncrementBasic(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'count': 1}
+        }}
+        fs.collection('foo').document('first').update({'count': firestore.Increment(2)})
+
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual(doc, {'count': 3})
+
+    def test_document_update_transformerIncrementNested(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {
+                'nested': {'count': 1},
+                'other': {'likes': 0},
+            }
+        }}
+        fs.collection('foo').document('first').update({
+            'nested': {'count': firestore.Increment(-1)},
+            'other': {'likes': firestore.Increment(1), 'smoked': 'salmon'},
+        })
+
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual(doc, {
+            'nested': {'count': 0},
+            'other': {'likes': 1, 'smoked': 'salmon'}
+        })
+
+    def test_document_update_transformerIncrementNonExistent(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'spicy': 'tuna'}
+        }}
+        fs.collection('foo').document('first').update({'count': firestore.Increment(1)})
+
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual(doc, {'count': 1, 'spicy': 'tuna'})
 
     def test_document_delete_documentDoesNotExistAfterDelete(self):
         fs = MockFirestore()
