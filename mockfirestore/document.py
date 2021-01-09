@@ -2,6 +2,7 @@ from copy import deepcopy
 from functools import reduce
 import operator
 from typing import List, Dict, Any
+from mockfirestore import NotFound
 from mockfirestore._helpers import Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
 
 
@@ -35,9 +36,15 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
+    def get(self, field_path: str) -> Any:
+        if not self.exists:
+            return None
+        else:
+            return reduce(operator.getitem, field_path.split('.'), self._doc)
+
     def _get_by_field_path(self, field_path: str) -> Any:
         try:
-            return reduce(operator.getitem, field_path.split('.'), self._doc)
+            return self.get(field_path)
         except KeyError:
             return None
 
@@ -61,12 +68,15 @@ class DocumentReference:
 
     def set(self, data: Dict, merge=False):
         if merge:
-            self.update(data)
+            self.update(deepcopy(data))
         else:
-            set_by_path(self._data, self._path, data)
+            set_by_path(self._data, self._path, deepcopy(data))
 
     def update(self, data: Dict[str, Any]):
-        get_by_path(self._data, self._path).update(data)
+        document = get_by_path(self._data, self._path)
+        if document == {}:
+            raise NotFound('No document to update: {}'.format(self._path))
+        document.update(deepcopy(data))
 
     def collection(self, name) -> 'CollectionReference':
         from mockfirestore.collection import CollectionReference
