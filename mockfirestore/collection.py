@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, List, Optional, Iterable, Dict, Tuple, Sequence
+from typing import Any, List, Optional, Iterable, Dict, Tuple, Sequence, Union
 
 from mockfirestore import AlreadyExists
 from mockfirestore._helpers import generate_random_string, Store, get_by_path, set_by_path, Timestamp
@@ -57,20 +57,20 @@ class CollectionReference:
         query = Query(self, offset=offset)
         return query
 
-    def start_at(self, document_fields: dict) -> Query:
-        query = Query(self, start_at=(document_fields, True))
+    def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> Query:
+        query = Query(self, start_at=(document_fields_or_snapshot, True))
         return query
 
-    def start_after(self, document_fields: dict) -> Query:
-        query = Query(self, start_at=(document_fields, False))
+    def start_after(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> Query:
+        query = Query(self, start_at=(document_fields_or_snapshot, False))
         return query
 
-    def end_at(self, document_fields: dict) -> Query:
-        query = Query(self, end_at=(document_fields, True))
+    def end_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> Query:
+        query = Query(self, end_at=(document_fields_or_snapshot, True))
         return query
 
-    def end_before(self, document_fields: dict) -> Query:
-        query = Query(self, end_at=(document_fields, False))
+    def end_before(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> Query:
+        query = Query(self, end_at=(document_fields_or_snapshot, False))
         return query
 
     def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:

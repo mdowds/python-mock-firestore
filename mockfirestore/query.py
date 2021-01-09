@@ -1,6 +1,6 @@
 import warnings
 from itertools import islice, tee
-from typing import Iterator, Any, Optional, List, Callable
+from typing import Iterator, Any, Optional, List, Callable, Union
 
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
@@ -37,12 +37,12 @@ class Query:
                                        key=lambda doc: doc.to_dict()[key],
                                        reverse=direction == 'DESCENDING')
         if self._start_at:
-            document_fields, before = self._start_at
-            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, True)
+            document_fields_or_snapshot, before = self._start_at
+            doc_snapshots = self._apply_cursor(document_fields_or_snapshot, doc_snapshots, before, True)
 
         if self._end_at:
-            document_fields, before = self._end_at
-            doc_snapshots = self._apply_cursor(document_fields, doc_snapshots, before, False)
+            document_fields_or_snapshot, before = self._end_at
+            doc_snapshots = self._apply_cursor(document_fields_or_snapshot, doc_snapshots, before, False)
 
         if self._offset:
             doc_snapshots = islice(doc_snapshots, self._offset, None)
@@ -77,33 +77,37 @@ class Query:
         self._offset = offset_amount
         return self
 
-    def start_at(self, document_fields: dict) -> 'Query':
-        self._start_at = (document_fields, True)
+    def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+        self._start_at = (document_fields_or_snapshot, True)
         return self
 
-    def start_after(self, document_fields: dict) -> 'Query':
-        self._start_at = (document_fields, False)
+    def start_after(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+        self._start_at = (document_fields_or_snapshot, False)
         return self
 
-    def end_at(self, document_fields: dict) -> 'Query':
-        self._end_at = (document_fields, True)
+    def end_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+        self._end_at = (document_fields_or_snapshot, True)
         return self
 
-    def end_before(self, document_fields: dict) -> 'Query':
-        self._end_at = (document_fields, False)
+    def end_before(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+        self._end_at = (document_fields_or_snapshot, False)
         return self
 
-    def _apply_cursor(self, document_fields: dict, doc_snapshot: Iterator[DocumentSnapshot],
+    def _apply_cursor(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot], doc_snapshot: Iterator[DocumentSnapshot],
                       before: bool, start: bool) -> Iterator[DocumentSnapshot]:
         docs, doc_snapshot = tee(doc_snapshot)
         for idx, doc in enumerate(doc_snapshot):
             index = None
-            for k, v in document_fields.items():
-                if doc.to_dict().get(k, None) == v:
+            if isinstance(document_fields_or_snapshot, dict):
+                for k, v in document_fields_or_snapshot.items():
+                    if doc.to_dict().get(k, None) == v:
+                        index = idx
+                    else:
+                        index = None
+                        break
+            elif isinstance(document_fields_or_snapshot, DocumentSnapshot):
+                if doc.id == document_fields_or_snapshot.id:
                     index = idx
-                else:
-                    index = None
-                    break
             if index is not None:
                 if before and start:
                     return islice(docs, index, None, None)

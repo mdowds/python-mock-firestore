@@ -244,6 +244,25 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 2}, docs[0].to_dict())
         self.assertEqual(2, len(docs))
 
+    def test_collection_start_at_doc_snapshot(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3},
+            'fourth': {'id': 4},
+            'fifth': {'id': 5},
+        }}
+
+        doc = fs.collection('foo').document('second').get()
+
+        docs = list(fs.collection('foo').order_by('id').start_at(doc).stream())
+        self.assertEqual(4, len(docs))
+        self.assertEqual({'id': 2}, docs[0].to_dict())
+        self.assertEqual({'id': 3}, docs[1].to_dict())
+        self.assertEqual({'id': 4}, docs[2].to_dict())
+        self.assertEqual({'id': 5}, docs[3].to_dict())
+
     def test_collection_start_after(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -278,6 +297,23 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 3}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
+    def test_collection_start_after_doc_snapshot(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'second': {'id': 2},
+            'third': {'id': 3},
+            'fourth': {'id': 4},
+            'fifth': {'id': 5},
+        }}
+
+        doc = fs.collection('foo').document('second').get()
+
+        docs = list(fs.collection('foo').order_by('id').start_after(doc).stream())
+        self.assertEqual(3, len(docs))
+        self.assertEqual({'id': 3}, docs[0].to_dict())
+        self.assertEqual({'id': 4}, docs[1].to_dict())
+        self.assertEqual({'id': 5}, docs[2].to_dict())
+
     def test_collection_end_before(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -300,6 +336,25 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
+    def test_collection_end_before_doc_snapshot(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3},
+            'fourth': {'id': 4},
+            'fifth': {'id': 5},
+        }}
+
+        doc = fs.collection('foo').document('fourth').get()
+
+        docs = list(fs.collection('foo').order_by('id').end_before(doc).stream())
+        self.assertEqual(3, len(docs))
+
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual({'id': 2}, docs[1].to_dict())
+        self.assertEqual({'id': 3}, docs[2].to_dict())
+
     def test_collection_end_at(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -321,6 +376,26 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').order_by('id').end_at({'id': 2}).stream())
         self.assertEqual({'id': 2}, docs[1].to_dict())
         self.assertEqual(2, len(docs))
+
+    def test_collection_end_at_doc_snapshot(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2},
+            'third': {'id': 3},
+            'fourth': {'id': 4},
+            'fifth': {'id': 5},
+        }}
+
+        doc = fs.collection('foo').document('fourth').get()
+
+        docs = list(fs.collection('foo').order_by('id').end_at(doc).stream())
+        self.assertEqual(4, len(docs))
+
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual({'id': 2}, docs[1].to_dict())
+        self.assertEqual({'id': 3}, docs[2].to_dict())
+        self.assertEqual({'id': 4}, docs[3].to_dict())
 
     def test_collection_limitAndOrderBy(self):
         fs = MockFirestore()
