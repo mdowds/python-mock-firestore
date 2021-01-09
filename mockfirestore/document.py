@@ -27,6 +27,15 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
+    @property
+    def update_time(self) -> Timestamp:
+        return self.create_time
+
+    @property
+    def read_time(self) -> Timestamp:
+        timestamp = Timestamp.from_now()
+        return timestamp
+
     def get(self, field_path: str) -> Any:
         if not self.exists:
             return None

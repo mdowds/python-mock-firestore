@@ -1,16 +1,7 @@
+from typing import Iterable
 from mockfirestore.collection import CollectionReference
-
-
-
-
-
-
-
-
-
-
-
-
+from mockfirestore.document import DocumentReference, DocumentSnapshot
+from mockfirestore.transaction import Transaction
 
 
 class MockFirestore:
@@ -26,5 +17,13 @@ class MockFirestore:
     def reset(self):
         self._data = {}
 
+    def get_all(self, references: Iterable[DocumentReference],
+                field_paths=None,
+                transaction=None) -> Iterable[DocumentSnapshot]:
+        for doc_ref in set(references):
+            yield doc_ref.get()
+
+    def transaction(self, **kwargs) -> Transaction:
+        return Transaction(self, **kwargs)
 
 
