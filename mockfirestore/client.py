@@ -24,7 +24,7 @@ class MockFirestore:
         path = path.split("/")
 
         if len(path) % 2 != 0:
-            raise Exception(f"Cannot create document at path {path}")
+            raise Exception("Cannot create document at path {}".format(path))
         current_position = self._ensure_path(path)
 
         return current_position.document(path[-1])
