@@ -33,7 +33,7 @@ class MockFirestore:
         path = path.split("/")
 
         if len(path) % 2 != 1:
-            raise Exception(f"Cannot create collection at path {path}")
+            raise Exception("Cannot create collection at path {}".format(path))
 
         name = path[-1]
         if len(path) > 1:
