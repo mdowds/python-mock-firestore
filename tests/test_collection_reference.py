@@ -33,12 +33,33 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').document('first').collection('bar').stream())
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
 
+    def test_collection_get_nestedCollection_by_path(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {
+                'id': 1,
+                'bar': {
+                    'first_nested': {'id': 1.1}
+                }
+            }
+        }}
+        docs = list(fs.collection('foo/first/bar').stream())
+        self.assertEqual({'id': 1.1}, docs[0].to_dict())
+
     def test_collection_get_nestedCollection_collectionDoesNotExist(self):
         fs = MockFirestore()
         fs._data = {'foo': {
             'first': {'id': 1}
         }}
         docs = list(fs.collection('foo').document('first').collection('bar').stream())
+        self.assertEqual([], docs)
+
+    def test_collection_get_nestedCollection_by_path_collectionDoesNotExist(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        docs = list(fs.collection('foo/first/bar').stream())
         self.assertEqual([], docs)
 
     def test_collection_get_ordersByAscendingDocumentId_byDefault(self):
