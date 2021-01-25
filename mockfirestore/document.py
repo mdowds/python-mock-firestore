@@ -93,6 +93,7 @@ class DocumentReference:
 def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
     """Handles special fields like INCREMENT."""
     increments = {}
+    arr_unions = {}
 
     for key, value in get_document_iterator(data):
         if not value.__class__.__module__.startswith('google.cloud.firestore'):
@@ -111,18 +112,24 @@ def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
         transformer = value.__class__.__name__
         if transformer == 'Increment':
             increments[key] = value.value
+        elif transformer == 'ArrayUnion':
+            arr_unions[key] = value.values
 
         # All other transformations can be applied as needed.
         # See #29 for tracking.
+    
+    def _update_data(new_values: dict, default: Any):
+        for key, value in new_values.items():
+            path = key.split('.')
 
-    for key, value in increments.items():
-        path = key.split('.')
+            try:
+                item = get_by_path(document, path)
+            except (TypeError, KeyError):
+                item = default
 
-        try:
-            item = get_by_path(document, path)
-        except (TypeError, KeyError):
-            item = 0
-
-        set_by_path(data, path, item + value)
+            set_by_path(data, path, item + value)
+    
+    _update_data(increments, 0)
+    _update_data(arr_unions, [])
 
     document.update(data)
