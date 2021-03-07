@@ -95,6 +95,11 @@ transaction.delete(mock_db.collection('users').document('alovelace'))
 transaction.commit()
 ```
 
+## Running the tests
+* Create and activate a virtualenv with a Python version of at least 3.5
+* Install dependencies with `pip install -r requirements-dev-minimal.txt`
+* Run tests with `python -m unittest discover tests -t /`
+
 ## Contributors
 
 * [Matt Dowds](https://github.com/mdowds)
