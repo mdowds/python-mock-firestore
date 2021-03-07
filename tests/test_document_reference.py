@@ -6,6 +6,24 @@ from mockfirestore import MockFirestore, NotFound
 
 
 class TestDocumentReference(TestCase):
+
+    def test_get_document_by_path(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.document('foo/first').get()
+        self.assertEqual({'id': 1}, doc.to_dict())
+        self.assertEqual('first', doc.id)
+
+    def test_set_document_by_path(self):
+        fs = MockFirestore()
+        fs._data = {}
+        doc_content = {'id': 'bar'}
+        fs.document('foo/doc1/bar/doc2').set(doc_content)
+        doc = fs.document('foo/doc1/bar/doc2').get().to_dict()
+        self.assertEqual(doc_content, doc)
+        
     def test_document_get_returnsDocument(self):
         fs = MockFirestore()
         fs._data = {'foo': {
