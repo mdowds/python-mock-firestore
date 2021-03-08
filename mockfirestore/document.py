@@ -6,7 +6,6 @@ from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path, get_document_iterator
 )
-from google.api_core.exceptions import NotFound
 
 
 class DocumentSnapshot:
