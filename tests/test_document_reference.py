@@ -105,6 +105,12 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'id': 1, 'updated': True}, doc)
 
+    def test_document_set_mergeNewValueForNonExistentDoc(self):
+        fs = MockFirestore()
+        fs.collection('foo').document('first').set({'updated': True}, merge=True)
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'updated': True}, doc)
+
     def test_document_set_overwriteValue(self):
         fs = MockFirestore()
         fs._data = {'foo': {

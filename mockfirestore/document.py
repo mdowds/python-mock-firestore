@@ -70,7 +70,10 @@ class DocumentReference:
 
     def set(self, data: Dict, merge=False):
         if merge:
-            self.update(deepcopy(data))
+            try:
+                self.update(deepcopy(data))
+            except NotFound:
+                self.set(data)
         else:
             set_by_path(self._data, self._path, deepcopy(data))
 
