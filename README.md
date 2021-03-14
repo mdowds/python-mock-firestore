@@ -53,7 +53,6 @@ mock_db.collection('users').document('alovelace').set({
 mock_db.collection('users').document('alovelace').set({'first': 'Augusta Ada'}, merge=True)
 mock_db.collection('users').document('alovelace').update({'born': 1815})
 mock_db.collection('users').document('alovelace').update({'associates': ['Charles Babbage', 'Michael Faraday']})
-mock_db.collection('users').document('alovelace').update({'likes': firestore.Increment(1)})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
 mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'}, 'alovelace')
@@ -75,6 +74,10 @@ mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
 mock_db.collection('users').where('born', 'in', [1815, 1900]).stream()
 mock_db.collection('users').where('associates', 'array_contains', 'Charles Babbage').stream()
 mock_db.collection('users').where('associates', 'array_contains_any', ['Charles Babbage', 'Michael Faraday']).stream()
+
+# Transforms
+mock_db.collection('users').document('alovelace').update({'likes': firestore.Increment(1)})
+mock_db.collection('users').document('alovelace').update({'associates': firestore.ArrayUnion(['Andrew Cross', 'Charles Wheatstone'])})
 
 # Cursors
 mock_db.collection('users').start_after({'id': 'alovelace'}).stream()
@@ -116,3 +119,4 @@ transaction.commit()
 * [Aaron Loo](https://github.com/domanchi)
 * [Kristof Krenn](https://github.com/KrennKristof)
 * [Ben Phillips](https://github.com/tavva)
+* [Rene Delgado](https://github.com/RDelg)
