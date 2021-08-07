@@ -91,7 +91,14 @@ class DocumentReference:
         if name not in document:
             set_by_path(self._data, new_path, {})
         return CollectionReference(self._data, new_path, parent=self)
-
+    
+    def collections(self):
+        from mockfirestore.collection import CollectionReference
+        collections=[]
+        for name in get_by_path(self._data, self._path):
+            new_path = self._path + [name]
+            collections.append(CollectionReference(self._data, new_path, parent=self))
+        return collections    
 
 def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
     """Handles special fields like INCREMENT."""
