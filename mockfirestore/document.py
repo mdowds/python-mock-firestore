@@ -164,7 +164,10 @@ def _apply_deletes(document: Dict[str, Any], data: List[str]):
 def _apply_arr_deletes(document: Dict[str, Any], data: Dict[str, Any]):
     for key, values_to_delete in data.items():
         path = key.split(".")
-        value = get_by_path(document, path)
+        try:
+            value = get_by_path(document, path)
+        except KeyError:
+            continue
         for value_to_delete in values_to_delete:
             try:
                 value.remove(value_to_delete)
