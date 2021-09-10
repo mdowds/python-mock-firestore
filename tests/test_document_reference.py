@@ -260,6 +260,16 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual(doc, {'arr': [1], 'spicy': 'tuna'})
 
+    def test_document_update_transformerSentinel(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'spicy': 'tuna'}
+        }}
+        fs.collection('foo').document('first').update({"spicy": firestore.DELETE_FIELD})
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {})
+
     def test_document_update_transformerArrayRemoveBasic(self):
         fs = MockFirestore()
         fs._data = {"foo": {"first": {"arr": [1, 2, 3, 4]}}}

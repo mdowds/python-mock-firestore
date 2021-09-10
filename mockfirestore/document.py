@@ -97,7 +97,8 @@ def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
     """Handles special fields like INCREMENT."""
     increments = {}
     arr_unions = {}
-    deletes = {}
+    arr_deletes = {}
+    deletes = []
 
     for key, value in list(get_document_iterator(data)):
         if not value.__class__.__module__.startswith('google.cloud.firestore'):
@@ -119,9 +120,12 @@ def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
         elif transformer == 'ArrayUnion':
             arr_unions[key] = value.values
         elif transformer == 'ArrayRemove':
-            deletes[key] = value.values
+            arr_deletes[key] = value.values
             del data[key]
-
+        elif transformer == 'Sentinel':
+            if value.description == "Value used to delete a field in a document.":
+                deletes.append(key)
+                del data[key]
 
         # All other transformations can be applied as needed.
         # See #29 for tracking.
@@ -142,8 +146,16 @@ def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
 
     document.update(data)
     _apply_deletes(document, deletes)
+    _apply_arr_deletes(document, arr_deletes)
 
-def _apply_deletes(document: Dict[str, Any], data: Dict[str, Any]):
+
+def _apply_deletes(document: Dict[str, Any], data: List[str]):
+    for key in data:
+        path = key.split(".")
+        delete_by_path(document, path)
+
+
+def _apply_arr_deletes(document: Dict[str, Any], data: Dict[str, Any]):
     for key, values_to_delete in data.items():
         path = key.split(".")
         value = get_by_path(document, path)
