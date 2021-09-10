@@ -78,6 +78,8 @@ mock_db.collection('users').where('associates', 'array_contains_any', ['Charles 
 # Transforms
 mock_db.collection('users').document('alovelace').update({'likes': firestore.Increment(1)})
 mock_db.collection('users').document('alovelace').update({'associates': firestore.ArrayUnion(['Andrew Cross', 'Charles Wheatstone'])})
+mock_db.collection('users').document('alovelace').update({firestore.DELETE_FIELD: "born"})
+mock_db.collection('users').document('alovelace').update({'associates': firestore.ArrayRemove(['Andrew Cross'])})
 
 # Cursors
 mock_db.collection('users').start_after({'id': 'alovelace'}).stream()
