@@ -52,6 +52,7 @@ mock_db.collection('users').document('alovelace').set({
 })
 mock_db.collection('users').document('alovelace').set({'first': 'Augusta Ada'}, merge=True)
 mock_db.collection('users').document('alovelace').update({'born': 1815})
+mock_db.collection('users').document('alovelace').update({'favourite.color': 'red'})
 mock_db.collection('users').document('alovelace').update({'associates': ['Charles Babbage', 'Michael Faraday']})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()

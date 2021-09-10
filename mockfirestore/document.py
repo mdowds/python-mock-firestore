@@ -139,6 +139,6 @@ def _apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
 
 
 def _apply_updates(document: Dict[str, Any], data: Dict[str, Any]):
-    for key in list(data.keys()):
+    for key, value in data.items():
         path = key.split(".")
-        set_by_path(document, path, data[key], create_nested=True)
+        set_by_path(document, path, value, create_nested=True)
