@@ -279,12 +279,20 @@ class TestDocumentReference(TestCase):
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc["arr"], [1, 2])
 
-
-    def test_document_update_transformerArrayRemoveNonExistent(self):
+    def test_document_update_transformerArrayRemoveNonExistentField(self):
         fs = MockFirestore()
         fs._data = {"foo": {"first": {"arr": [1, 2, 3, 4]}}}
         fs.collection("foo").document("first").update(
             {"arr": firestore.ArrayRemove([5])}
+        )
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc["arr"], [1, 2, 3, 4])
+
+    def test_document_update_transformerArrayRemoveNonExistentArray(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"arr": [1, 2, 3, 4]}}}
+        fs.collection("foo").document("first").update(
+            {"non_existent_array": firestore.ArrayRemove([1, 2])}
         )
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc["arr"], [1, 2, 3, 4])
