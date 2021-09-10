@@ -259,3 +259,41 @@ class TestDocumentReference(TestCase):
 
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual(doc, {'arr': [1], 'spicy': 'tuna'})
+
+    def test_document_update_nestedFieldDotNotation(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"nested": {"value": 1, "unchanged": "foo"}}}}
+
+        fs.collection("foo").document("first").update({"nested.value": 2})
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {"nested": {"value": 2, "unchanged": "foo"}})
+
+    def test_document_update_nestedFieldDotNotationNestedFieldCreation(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"other": None}}}  # non-existent nested field is created
+
+        fs.collection("foo").document("first").update({"nested.value": 2})
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {"nested": {"value": 2}, "other": None})
+
+    def test_document_update_nestedFieldDotNotationMultipleNested(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"other": None}}}
+
+        fs.collection("foo").document("first").update({"nested.subnested.value": 42})
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {"nested": {"subnested": {"value": 42}}, "other": None})
+
+    def test_document_update_nestedFieldDotNotationMultipleNestedWithTransformer(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"other": None}}}
+
+        fs.collection("foo").document("first").update(
+            {"nested.subnested.value": firestore.ArrayUnion([1, 3])}
+        )
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {"nested": {"subnested": {"value": [1, 3]}}, "other": None})

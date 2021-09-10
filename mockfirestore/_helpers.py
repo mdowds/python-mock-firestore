@@ -12,14 +12,23 @@ Collection = Dict[str, Document]
 Store = Dict[str, Collection]
 
 
-def get_by_path(data: Dict[str, T], path: Sequence[str]) -> T:
+def get_by_path(data: Dict[str, T], path: Sequence[str], create_nested: bool = False) -> T:
     """Access a nested object in root by item sequence."""
-    return reduce(operator.getitem, path, data)
+
+    def get_or_create(a, b):
+        if b not in a:
+            a[b] = {}
+        return a[b]
+
+    if create_nested:
+        return reduce(get_or_create, path, data)
+    else:
+        return reduce(operator.getitem, path, data)
 
 
-def set_by_path(data: Dict[str, T], path: Sequence[str], value: T):
+def set_by_path(data: Dict[str, T], path: Sequence[str], value: T, create_nested: bool = True):
     """Set a value in a nested object in root by item sequence."""
-    get_by_path(data, path[:-1])[path[-1]] = value
+    get_by_path(data, path[:-1], create_nested=True)[path[-1]] = value
 
 
 def delete_by_path(data: Dict[str, T], path: Sequence[str]):
