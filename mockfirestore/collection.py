@@ -14,12 +14,12 @@ class CollectionReference:
         self._path = path
         self.parent = parent
 
-    def document(self, name: Optional[str] = None) -> DocumentReference:
+    def document(self, document_id: Optional[str] = None) -> DocumentReference:
         collection = get_by_path(self._data, self._path)
-        if name is None:
-            name = generate_random_string()
-        new_path = self._path + [name]
-        if name not in collection:
+        if document_id is None:
+            document_id = generate_random_string()
+        new_path = self._path + [document_id]
+        if document_id not in collection:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path, parent=self)
 
