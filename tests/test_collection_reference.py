@@ -479,3 +479,11 @@ class TestCollectionReference(TestCase):
 
         with self.assertRaises(AlreadyExists):
             fs.collection('foo').add(doc_content)
+
+    def test_collection_useDocumentIdKwarg(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.collection('foo').document(document_id='first').get()
+        self.assertEqual({'id': 1}, doc.to_dict())
