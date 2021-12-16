@@ -57,6 +57,10 @@ class CollectionReference:
         query = Query(self, offset=offset)
         return query
 
+    def select(self, fields: List[str]) -> Query:
+        query = Query(self, select=fields)
+        return query
+
     def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> Query:
         query = Query(self, start_at=(document_fields_or_snapshot, True))
         return query
