@@ -57,6 +57,7 @@ mock_db.collection('users').document('alovelace').update({'favourite.color': 're
 mock_db.collection('users').document('alovelace').update({'associates': ['Charles Babbage', 'Michael Faraday']})
 mock_db.collection('users').document('alovelace').collection('friends')
 mock_db.collection('users').document('alovelace').delete()
+mock_db.collection('users').document(document_id: 'alovelace').delete()
 mock_db.collection('users').add({'first': 'Ada', 'last': 'Lovelace'}, 'alovelace')
 mock_db.get_all([mock_db.collection('users').document('alovelace')])
 mock_db.document('users/alovelace')
