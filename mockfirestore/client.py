@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Sequence
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.transaction import Transaction
@@ -43,6 +43,9 @@ class MockFirestore:
             if name not in self._data:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
+
+    def collections(self) -> Sequence[CollectionReference]:
+        return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
 
     def reset(self):
         self._data = {}
