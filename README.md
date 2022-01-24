@@ -1,6 +1,6 @@
 # Python Mock Firestore
 
-An in-memory implementation of the [Python client library](https://github.com/googleapis/google-cloud-python/tree/master/firestore) for Google Cloud Firestore, intended for use in tests to replace the real thing. This project is in early stages and is only a partial implementation of the real  client library.
+An in-memory implementation of the [Python client library](https://github.com/googleapis/python-firestore) for Google Cloud Firestore, intended for use in tests to replace the real thing. This project is in early stages and is only a partial implementation of the real  client library.
 
 To install:
 
