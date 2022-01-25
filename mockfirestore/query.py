@@ -50,6 +50,15 @@ class Query:
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
 
+        if self.projection:
+            doc_snapshots = [
+                DocumentSnapshot(
+                    x.reference,
+                    {k: v for k, v in x.to_dict().items() if k in self.projection}
+                )
+                for x in doc_snapshots
+            ]
+
         return iter(doc_snapshots)
 
     def get(self) -> Iterator[DocumentSnapshot]:
@@ -75,6 +84,10 @@ class Query:
 
     def offset(self, offset_amount: int) -> 'Query':
         self._offset = offset_amount
+        return self
+
+    def select(self, field_paths: List[str]) -> 'Query':
+        self.projection = field_paths
         return self
 
     def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
