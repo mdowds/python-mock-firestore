@@ -8,7 +8,7 @@ from mockfirestore._helpers import T
 
 class Query:
     def __init__(self, parent: 'CollectionReference', projection=None,
-                 field_filters=(), orders=(), limit=None, offset=None, select=None,
+                 field_filters=(), orders=(), limit=None, offset=None,
                  start_at=None, end_at=None, all_descendants=False) -> None:
         self.parent = parent
         self.projection = projection
@@ -16,7 +16,6 @@ class Query:
         self.orders = list(orders)
         self._limit = limit
         self._offset = offset
-        self._select = select
         self._start_at = start_at
         self._end_at = end_at
         self.all_descendants = all_descendants
@@ -51,8 +50,14 @@ class Query:
         if self._limit:
             doc_snapshots = islice(doc_snapshots, self._limit)
 
-        if self._select:
-            doc_snapshots = [DocumentSnapshot(x.reference, {k: v for k, v in x.to_dict().items() if k in self._select}) for x in doc_snapshots]
+        if self.projection:
+            doc_snapshots = [
+                DocumentSnapshot(
+                    x.reference,
+                    {k: v for k, v in x.to_dict().items() if k in self.projection}
+                )
+                for x in doc_snapshots
+            ]
 
         return iter(doc_snapshots)
 
@@ -81,8 +86,8 @@ class Query:
         self._offset = offset_amount
         return self
 
-    def select(self, select_fields: List[str]) -> 'Query':
-        self._select = select_fields
+    def select(self, field_paths: List[str]) -> 'Query':
+        self.projection = field_paths
         return self
 
     def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
