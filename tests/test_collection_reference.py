@@ -245,11 +245,39 @@ class TestCollectionReference(TestCase):
 
     def test_collection_select(self):
         fs = MockFirestore()
-        fs._data = {'foo': {'first': {'id': 1, 'value': 'one'}, 'second': {'id': 2, 'value': 'two'}, 'third': {'id': 3, 'value': 'three'}}}
+        fs._data = {'foo': {
+            'first': {'id': 1, 'value': 'one'},
+            'second': {'id': 2, 'value': 'two'},
+            'third': {'id': 3, 'value': 'three'}
+        }}
         docs = list(fs.collection('foo').select(['id']).stream())
-        self.assertEquals({'id': 1}, docs[0].to_dict())
-        self.assertEquals({'id': 2}, docs[1].to_dict())
-        self.assertEquals({'id': 3}, docs[2].to_dict())
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual({'id': 2}, docs[1].to_dict())
+        self.assertEqual({'id': 3}, docs[2].to_dict())
+
+    def test_collection_select_missing_fields(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'value': 'one'},
+            'second': {'id': 2, 'value': 'two'},
+            'third': {'id': 3, 'value': 'three'}
+        }}
+        docs = list(fs.collection("foo").select(["name"]).stream())
+        self.assertEqual({}, docs[0].to_dict())
+        self.assertEqual({}, docs[1].to_dict())
+        self.assertEqual({}, docs[2].to_dict())
+
+    def test_collection_select_one_missing_field(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'value': 'one'},
+            'second': {'id': 2, 'value': 'two'},
+            'third': {'id': 3, 'value': 'three'}
+        }}
+        docs = list(fs.collection("foo").select(["id", "name"]).stream())
+        self.assertEqual({"id": 1}, docs[0].to_dict())
+        self.assertEqual({"id": 2}, docs[1].to_dict())
+        self.assertEqual({"id": 3}, docs[2].to_dict())
 
     def test_collection_start_at(self):
         fs = MockFirestore()
