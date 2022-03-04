@@ -1,4 +1,4 @@
-from typing import Iterable, Sequence, Optional, Collection
+from typing import Iterable, Sequence, Optional
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.transaction import Transaction
@@ -6,12 +6,7 @@ from mockfirestore.transaction import Transaction
 
 class MockFirestore:
 
-    def __init__(self, collection_groups: Optional[Collection[str]] = None) -> None:
-        """
-        Args:
-            collection_groups: The collection group names. If none, collection group queries are not supported.
-        """
-        self._collection_groups = collection_groups or set()
+    def __init__(self) -> None:
         self._data = {}
 
     def _ensure_path(self, path):
@@ -52,9 +47,6 @@ class MockFirestore:
     def collection_group(self, name: str) -> CollectionReference:
         if '/' in name:
             raise Exception("Collection group names cannot contain '/'")
-
-        if name not in self._collection_groups:
-            raise Exception(f"Collection group {name} must be specified in the constructor")
 
         collection_group_data = _get_collection_group_data(self._data, name)
         data = {name: collection_group_data}

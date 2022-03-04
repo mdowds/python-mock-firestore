@@ -64,7 +64,7 @@ class TestCollectionReference(TestCase):
 
     def test_collection_get_collectionGroup(self):
         subcollection = 'bar'
-        fs = MockFirestore(collection_groups={subcollection})
+        fs = MockFirestore()
         fs._data = {'foo': {
             'first': {
                 'id': 1,
@@ -85,7 +85,7 @@ class TestCollectionReference(TestCase):
 
     def test_collection_get_collectionGroup_collectionDoesNotExist(self):
         subcollection = 'bar'
-        fs = MockFirestore(collection_groups={subcollection})
+        fs = MockFirestore()
         fs._data = {'foo': {
             'first': {'id': 1}
         }}
