@@ -1,4 +1,4 @@
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Optional, Collection
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.transaction import Transaction
@@ -6,7 +6,12 @@ from mockfirestore.transaction import Transaction
 
 class MockFirestore:
 
-    def __init__(self) -> None:
+    def __init__(self, collection_groups: Optional[Collection[str]] = None) -> None:
+        """
+        Args:
+            collection_groups: The collection group names. If none, collection group queries are not supported.
+        """
+        self._collection_groups = collection_groups or set()
         self._data = {}
 
     def _ensure_path(self, path):
@@ -44,6 +49,18 @@ class MockFirestore:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
 
+    def collection_group(self, name: str) -> CollectionReference:
+        if '/' in name:
+            raise Exception("Collection group names cannot contain '/'")
+
+        if name not in self._collection_groups:
+            raise Exception(f"Collection group {name} must be specified in the constructor")
+
+        collection_group_data = _get_collection_group_data(self._data, name)
+        data = {name: collection_group_data}
+
+        return CollectionReference(data, [name])
+
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
 
@@ -60,3 +77,25 @@ class MockFirestore:
         return Transaction(self, **kwargs)
 
 
+def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = None) -> dict:
+    """
+    Recursively get the data for a collection group.
+
+    Args:
+        data: The root data or document data to search.
+        name: The name of the collection group.
+        output: The flat output dictionary.
+
+    Returns:
+        A flat dictionary containing all the data for the collection group.
+    """
+    output = output or {}
+    if name in data:
+        output.update(data[name])
+        return output
+    else:
+        for documents_in_collection in data.values():
+            if isinstance(documents_in_collection, dict):
+                output.update(_get_collection_group_data(documents_in_collection, name, output))
+
+    return output
