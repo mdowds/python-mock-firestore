@@ -137,3 +137,8 @@ class Query:
             return lambda x, y: y in x
         elif op == 'array_contains_any':
             return lambda x, y: any([val in y for val in x])
+
+
+class CollectionGroup(Query):
+    def get_partitions(self, *_, **__):
+        raise NotImplementedError

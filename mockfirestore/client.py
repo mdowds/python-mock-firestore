@@ -1,6 +1,7 @@
 from typing import Iterable, Sequence, Optional
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
+from mockfirestore.query import CollectionGroup
 from mockfirestore.transaction import Transaction
 
 
@@ -44,14 +45,18 @@ class MockFirestore:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
 
-    def collection_group(self, name: str) -> CollectionReference:
-        if '/' in name:
-            raise Exception("Collection group names cannot contain '/'")
+    def collection_group(self, collection_id: str) -> CollectionGroup:
+        if '/' in collection_id:
+            raise ValueError(
+                "Invalid collection_id "
+                + collection_id
+                + ". Collection IDs must not contain '/'."
+            )
 
-        collection_group_data = _get_collection_group_data(self._data, name)
-        data = {name: collection_group_data}
+        collection_group_data = _get_collection_group_data(self._data, collection_id)
+        data = {collection_id: collection_group_data}
 
-        return CollectionReference(data, [name])
+        return CollectionGroup(CollectionReference(data, [collection_id]))
 
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
