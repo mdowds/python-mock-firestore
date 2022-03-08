@@ -278,6 +278,15 @@ class TestDocumentReference(TestCase):
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc, {"nested": {"value": 2}, "other": None})
 
+    def test_document_update_nestedFieldDotNotationNestedNoneFieldCreation(self):
+        fs = MockFirestore()
+        fs._data = {"foo": {"first": {"other": None}}}  # non-existent nested field is created
+
+        fs.collection("foo").document("first").update({"other.value": 2})
+
+        doc = fs.collection("foo").document("first").get().to_dict()
+        self.assertEqual(doc, {"other": {"value": 2}})
+
     def test_document_update_nestedFieldDotNotationMultipleNested(self):
         fs = MockFirestore()
         fs._data = {"foo": {"first": {"other": None}}}
