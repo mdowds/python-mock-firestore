@@ -298,7 +298,6 @@ class TestDocumentReference(TestCase):
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc, {"nested": {"subnested": {"value": [1, 3]}}, "other": None})
 
-
     def test_document_update_transformerSentinel(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -335,4 +334,3 @@ class TestDocumentReference(TestCase):
         )
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc["arr"], [1, 2, 3, 4])
-
