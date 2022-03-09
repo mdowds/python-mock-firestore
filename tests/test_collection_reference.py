@@ -62,6 +62,36 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo/first/bar').stream())
         self.assertEqual([], docs)
 
+    def test_collection_get_collectionGroup(self):
+        subcollection = 'bar'
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {
+                'id': 1,
+                subcollection: {
+                    'first_nested': {'id': 1.1}
+                }
+            },
+            'second': {
+                'id': 2,
+                subcollection: {
+                    'second_nested': {'id': 2.1}
+                }
+            }
+        }}
+        docs = sorted(list(fs.collection_group(subcollection).stream()), key=lambda doc: doc.id)
+        self.assertEqual({'id': 1.1}, docs[0].to_dict())
+        self.assertEqual({'id': 2.1}, docs[1].to_dict())
+
+    def test_collection_get_collectionGroup_collectionDoesNotExist(self):
+        subcollection = 'bar'
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        docs = list(fs.collection_group(subcollection).stream())
+        self.assertEqual([], docs)
+
     def test_collection_get_ordersByAscendingDocumentId_byDefault(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -226,6 +256,25 @@ class TestCollectionReference(TestCase):
         docs = list(fs.collection('foo').limit(1).stream())
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
+
+    def test_collection_limitNone(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2}
+        }}
+        docs = list(fs.collection('foo').limit(None).stream())
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual(2, len(docs))
+
+    def test_collection_limitInvalid(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2}
+        }}
+        with self.assertRaises(TypeError):
+            list(fs.collection('foo').limit(1.0).stream())
 
     def test_collection_offset(self):
         fs = MockFirestore()

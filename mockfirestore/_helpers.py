@@ -28,7 +28,13 @@ def get_by_path(data: Dict[str, T], path: Sequence[str], create_nested: bool = F
 
 def set_by_path(data: Dict[str, T], path: Sequence[str], value: T, create_nested: bool = True):
     """Set a value in a nested object in root by item sequence."""
-    get_by_path(data, path[:-1], create_nested=True)[path[-1]] = value
+    data_nested = data
+    for key in path[:-1]:
+        new_data_nested = data_nested.setdefault(key, {})
+        if not isinstance(new_data_nested, dict):
+            data_nested[key] = {}
+        data_nested = data_nested[key]
+    data_nested[path[-1]] = value
 
 
 def delete_by_path(data: Dict[str, T], path: Sequence[str]):

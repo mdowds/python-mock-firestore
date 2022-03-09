@@ -1,6 +1,7 @@
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Optional
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
+from mockfirestore.query import CollectionGroup
 from mockfirestore.transaction import Transaction
 
 
@@ -44,6 +45,19 @@ class MockFirestore:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
 
+    def collection_group(self, collection_id: str) -> CollectionGroup:
+        if '/' in collection_id:
+            raise ValueError(
+                "Invalid collection_id "
+                + collection_id
+                + ". Collection IDs must not contain '/'."
+            )
+
+        collection_group_data = _get_collection_group_data(self._data, collection_id)
+        data = {collection_id: collection_group_data}
+
+        return CollectionGroup(CollectionReference(data, [collection_id]))
+
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
 
@@ -60,3 +74,25 @@ class MockFirestore:
         return Transaction(self, **kwargs)
 
 
+def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = None) -> dict:
+    """
+    Recursively get the data for a collection group.
+
+    Args:
+        data: The root data or document data to search.
+        name: The name of the collection group.
+        output: The flat output dictionary.
+
+    Returns:
+        A flat dictionary containing all the data for the collection group.
+    """
+    output = output or {}
+    if name in data:
+        output.update(data[name])
+        return output
+    else:
+        for documents_in_collection in data.values():
+            if isinstance(documents_in_collection, dict):
+                output.update(_get_collection_group_data(documents_in_collection, name, output))
+
+    return output
