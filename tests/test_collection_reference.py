@@ -257,6 +257,25 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 1}, docs[0].to_dict())
         self.assertEqual(1, len(docs))
 
+    def test_collection_limitNone(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2}
+        }}
+        docs = list(fs.collection('foo').limit(None).stream())
+        self.assertEqual({'id': 1}, docs[0].to_dict())
+        self.assertEqual(2, len(docs))
+
+    def test_collection_limitInvalid(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2}
+        }}
+        with self.assertRaises(TypeError):
+            list(fs.collection('foo').limit(1.0).stream())
+
     def test_collection_offset(self):
         fs = MockFirestore()
         fs._data = {'foo': {

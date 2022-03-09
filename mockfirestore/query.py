@@ -69,7 +69,7 @@ class Query:
         self.orders.append((key, direction))
         return self
 
-    def limit(self, limit_amount: int) -> 'Query':
+    def limit(self, limit_amount: Optional[int]) -> 'Query':
         self._limit = limit_amount
         return self
 

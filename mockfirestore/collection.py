@@ -49,7 +49,13 @@ class CollectionReference:
         query = Query(self, orders=[(key, direction)])
         return query
 
-    def limit(self, limit_amount: int) -> Query:
+    def limit(self, limit_amount: Optional[int]) -> Query:
+        if not isinstance(limit_amount, (int, type(None))):
+            raise TypeError(
+                f"TypeError: Cannot set google.protobuf.Int32Value.value to {limit_amount}:"
+                f" {limit_amount} has type {type(limit_amount)},"
+                f" but expected one of: ({int},) for field Int32Value.value"
+            )
         query = Query(self, limit=limit_amount)
         return query
 
