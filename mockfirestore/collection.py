@@ -23,10 +23,8 @@ class CollectionReference:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path, parent=self)
 
-    def get(self) -> Iterable[DocumentSnapshot]:
-        warnings.warn('Collection.get is deprecated, please use Collection.stream',
-                      category=DeprecationWarning)
-        return self.stream()
+    def get(self) -> List[DocumentSnapshot]:
+        return list(self.stream())
 
     def add(self, document_data: Dict, document_id: str = None) \
             -> Tuple[Timestamp, DocumentReference]:
