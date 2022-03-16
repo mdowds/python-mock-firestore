@@ -52,10 +52,8 @@ class Query:
 
         return iter(doc_snapshots)
 
-    def get(self) -> Iterator[DocumentSnapshot]:
-        warnings.warn('Query.get is deprecated, please use Query.stream',
-                      category=DeprecationWarning)
-        return self.stream()
+    def get(self, transaction=None) -> List[DocumentSnapshot]:
+        return list(self.stream())
 
     def _add_field_filter(self, field: str, op: str, value: Any):
         compare = self._compare_func(op)
