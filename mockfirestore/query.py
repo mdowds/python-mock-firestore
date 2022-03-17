@@ -1,6 +1,5 @@
-import warnings
 from itertools import islice, tee
-from typing import Iterator, Any, Optional, List, Callable, Union
+from typing import Iterator, Any, Optional, List, Callable, Union, AsyncIterable
 
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
@@ -24,13 +23,7 @@ class Query:
             for field_filter in field_filters:
                 self._add_field_filter(*field_filter)
 
-    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
-        doc_snapshots = self.parent.stream()
-
-        for field, compare, value in self._field_filters:
-            doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
-                             if compare(doc_snapshot._get_by_field_path(field), value)]
-
+    def _process_pagination(self, doc_snapshots: Iterator[DocumentSnapshot]):
         if self.orders:
             for key, direction in self.orders:
                 doc_snapshots = sorted(doc_snapshots,
@@ -51,6 +44,16 @@ class Query:
             doc_snapshots = islice(doc_snapshots, self._limit)
 
         return iter(doc_snapshots)
+
+    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
+        doc_snapshots = self.parent.stream()
+
+        for field, compare, value in self._field_filters:
+            doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
+                             if compare(doc_snapshot._get_by_field_path(field), value)]
+
+        return self._process_pagination(doc_snapshots)
+
 
     def get(self, transaction=None) -> List[DocumentSnapshot]:
         return list(self.stream())
