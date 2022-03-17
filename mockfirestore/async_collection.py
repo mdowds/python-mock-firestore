@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple, Dict, AsyncIterator, Any
+from typing import Optional, List, Tuple, Dict, AsyncIterator, Any, Union
 from mockfirestore.async_document import AsyncDocumentReference
 from mockfirestore.async_query import AsyncQuery
 from mockfirestore.collection import CollectionReference
@@ -39,4 +39,32 @@ class AsyncCollectionReference(CollectionReference):
 
     def where(self, field: str, op: str, value: Any) -> AsyncQuery:
         query = AsyncQuery(self, field_filters=[(field, op, value)])
+        return query
+
+    def order_by(self, key: str, direction: Optional[str] = None) -> AsyncQuery:
+        query = AsyncQuery(self, orders=[(key, direction)])
+        return query
+
+    def limit(self, limit_amount: int) -> AsyncQuery:
+        query = AsyncQuery(self, limit=limit_amount)
+        return query
+
+    def offset(self, offset: int) -> AsyncQuery:
+        query = AsyncQuery(self, offset=offset)
+        return query
+
+    def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> AsyncQuery:
+        query = AsyncQuery(self, start_at=(document_fields_or_snapshot, True))
+        return query
+
+    def start_after(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> AsyncQuery:
+        query = AsyncQuery(self, start_at=(document_fields_or_snapshot, False))
+        return query
+
+    def end_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> AsyncQuery:
+        query = AsyncQuery(self, end_at=(document_fields_or_snapshot, True))
+        return query
+
+    def end_before(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> AsyncQuery:
+        query = AsyncQuery(self, end_at=(document_fields_or_snapshot, False))
         return query

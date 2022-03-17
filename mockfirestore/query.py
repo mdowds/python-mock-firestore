@@ -6,9 +6,18 @@ from mockfirestore._helpers import T
 
 
 class Query:
-    def __init__(self, parent: 'CollectionReference', projection=None,
-                 field_filters=(), orders=(), limit=None, offset=None,
-                 start_at=None, end_at=None, all_descendants=False) -> None:
+    def __init__(
+        self,
+        parent: "CollectionReference",
+        projection=None,
+        field_filters=(),
+        orders=(),
+        limit=None,
+        offset=None,
+        start_at=None,
+        end_at=None,
+        all_descendants=False,
+    ) -> None:
         self.parent = parent
         self.projection = projection
         self._field_filters = []
@@ -26,16 +35,22 @@ class Query:
     def _process_pagination(self, doc_snapshots: Iterator[DocumentSnapshot]):
         if self.orders:
             for key, direction in self.orders:
-                doc_snapshots = sorted(doc_snapshots,
-                                       key=lambda doc: doc.to_dict()[key],
-                                       reverse=direction == 'DESCENDING')
+                doc_snapshots = sorted(
+                    doc_snapshots,
+                    key=lambda doc: doc.to_dict()[key],
+                    reverse=direction == "DESCENDING",
+                )
         if self._start_at:
             document_fields_or_snapshot, before = self._start_at
-            doc_snapshots = self._apply_cursor(document_fields_or_snapshot, doc_snapshots, before, True)
+            doc_snapshots = self._apply_cursor(
+                document_fields_or_snapshot, doc_snapshots, before, True
+            )
 
         if self._end_at:
             document_fields_or_snapshot, before = self._end_at
-            doc_snapshots = self._apply_cursor(document_fields_or_snapshot, doc_snapshots, before, False)
+            doc_snapshots = self._apply_cursor(
+                document_fields_or_snapshot, doc_snapshots, before, False
+            )
 
         if self._offset:
             doc_snapshots = islice(doc_snapshots, self._offset, None)
@@ -49,11 +64,13 @@ class Query:
         doc_snapshots = self.parent.stream()
 
         for field, compare, value in self._field_filters:
-            doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
-                             if compare(doc_snapshot._get_by_field_path(field), value)]
+            doc_snapshots = [
+                doc_snapshot
+                for doc_snapshot in doc_snapshots
+                if compare(doc_snapshot._get_by_field_path(field), value)
+            ]
 
         return self._process_pagination(doc_snapshots)
-
 
     def get(self, transaction=None) -> List[DocumentSnapshot]:
         return list(self.stream())
@@ -62,40 +79,53 @@ class Query:
         compare = self._compare_func(op)
         self._field_filters.append((field, compare, value))
 
-    def where(self, field: str, op: str, value: Any) -> 'Query':
+    def where(self, field: str, op: str, value: Any) -> "Query":
         self._add_field_filter(field, op, value)
         return self
 
-    def order_by(self, key: str, direction: Optional[str] = 'ASCENDING') -> 'Query':
+    def order_by(self, key: str, direction: Optional[str] = "ASCENDING") -> "Query":
         self.orders.append((key, direction))
         return self
 
-    def limit(self, limit_amount: int) -> 'Query':
+    def limit(self, limit_amount: int) -> "Query":
         self._limit = limit_amount
         return self
 
-    def offset(self, offset_amount: int) -> 'Query':
+    def offset(self, offset_amount: int) -> "Query":
         self._offset = offset_amount
         return self
 
-    def start_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+    def start_at(
+        self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]
+    ) -> "Query":
         self._start_at = (document_fields_or_snapshot, True)
         return self
 
-    def start_after(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+    def start_after(
+        self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]
+    ) -> "Query":
         self._start_at = (document_fields_or_snapshot, False)
         return self
 
-    def end_at(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+    def end_at(
+        self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]
+    ) -> "Query":
         self._end_at = (document_fields_or_snapshot, True)
         return self
 
-    def end_before(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]) -> 'Query':
+    def end_before(
+        self, document_fields_or_snapshot: Union[dict, DocumentSnapshot]
+    ) -> "Query":
         self._end_at = (document_fields_or_snapshot, False)
         return self
 
-    def _apply_cursor(self, document_fields_or_snapshot: Union[dict, DocumentSnapshot], doc_snapshot: Iterator[DocumentSnapshot],
-                      before: bool, start: bool) -> Iterator[DocumentSnapshot]:
+    def _apply_cursor(
+        self,
+        document_fields_or_snapshot: Union[dict, DocumentSnapshot],
+        doc_snapshot: Iterator[DocumentSnapshot],
+        before: bool,
+        start: bool,
+    ) -> Iterator[DocumentSnapshot]:
         docs, doc_snapshot = tee(doc_snapshot)
         for idx, doc in enumerate(doc_snapshot):
             index = None
@@ -120,21 +150,21 @@ class Query:
                     return islice(docs, 0, index, None)
 
     def _compare_func(self, op: str) -> Callable[[T, T], bool]:
-        if op == '==':
+        if op == "==":
             return lambda x, y: x == y
-        elif op == '!=':
+        elif op == "!=":
             return lambda x, y: x != y
-        elif op == '<':
+        elif op == "<":
             return lambda x, y: x < y
-        elif op == '<=':
+        elif op == "<=":
             return lambda x, y: x <= y
-        elif op == '>':
+        elif op == ">":
             return lambda x, y: x > y
-        elif op == '>=':
+        elif op == ">=":
             return lambda x, y: x >= y
-        elif op == 'in':
+        elif op == "in":
             return lambda x, y: x in y
-        elif op == 'array_contains':
+        elif op == "array_contains":
             return lambda x, y: y in x
-        elif op == 'array_contains_any':
+        elif op == "array_contains_any":
             return lambda x, y: any([val in y for val in x])
