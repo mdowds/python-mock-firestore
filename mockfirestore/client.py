@@ -13,7 +13,7 @@ class MockFirestore:
         current_position = self
 
         for el in path[:-1]:
-            if type(current_position) in (MockFirestore, DocumentReference):
+            if isinstance(current_position, (MockFirestore, DocumentReference)):
                 current_position = current_position.collection(el)
             else:
                 current_position = current_position.document(el)
