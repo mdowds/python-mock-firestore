@@ -1,5 +1,6 @@
-from typing import Optional, List, Tuple, Dict, AsyncIterator
+from typing import Optional, List, Tuple, Dict, AsyncIterator, Any
 from mockfirestore.async_document import AsyncDocumentReference
+from mockfirestore.async_query import AsyncQuery
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentSnapshot, DocumentReference
 from mockfirestore._helpers import Timestamp, get_by_path
@@ -32,5 +33,10 @@ class AsyncCollectionReference(CollectionReference):
             yield doc
 
     async def stream(self, transaction=None) -> AsyncIterator[DocumentSnapshot]:
-        for doc_snapshot in super().stream():
+        for key in sorted(get_by_path(self._data, self._path)):
+            doc_snapshot = await self.document(key).get()
             yield doc_snapshot
+
+    def where(self, field: str, op: str, value: Any) -> AsyncQuery:
+        query = AsyncQuery(self, field_filters=[(field, op, value)])
+        return query
