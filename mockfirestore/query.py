@@ -1,5 +1,5 @@
 from itertools import islice, tee
-from typing import Iterator, Any, Optional, List, Callable, Union, AsyncIterable
+from typing import Iterator, Any, Optional, List, Callable, Union, Iterable
 
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
@@ -60,16 +60,20 @@ class Query:
 
         return iter(doc_snapshots)
 
-    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
-        doc_snapshots = self.parent.stream()
-
+    def _process_field_filters(
+        self, doc_snapshots: Iterator[DocumentSnapshot]
+    ) -> Iterable[DocumentSnapshot]:
         for field, compare, value in self._field_filters:
             doc_snapshots = [
                 doc_snapshot
                 for doc_snapshot in doc_snapshots
                 if compare(doc_snapshot._get_by_field_path(field), value)
             ]
+        return doc_snapshots
 
+    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
+        doc_snapshots = self.parent.stream()
+        doc_snapshots = self._process_field_filters(doc_snapshots)
         return self._process_pagination(doc_snapshots)
 
     def get(self, transaction=None) -> List[DocumentSnapshot]:
