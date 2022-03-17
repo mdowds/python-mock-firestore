@@ -26,7 +26,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         async with AsyncTransaction(self.fs) as transaction:
             await transaction._begin()
             doc = self.fs.collection("foo").document("first")
-            returned_doc = await anext(transaction.get(doc))
+            returned_doc = [doc async for doc in transaction.get(doc)][0]
             self.assertEqual((await doc.get()).to_dict(), returned_doc.to_dict())
 
     async def test_transaction_getQuery(self):
