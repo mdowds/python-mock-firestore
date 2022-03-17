@@ -1,5 +1,4 @@
 from functools import partial
-import random
 from typing import Iterable, Callable
 from mockfirestore._helpers import generate_random_string, Timestamp
 from mockfirestore.document import DocumentReference, DocumentSnapshot
@@ -22,8 +21,8 @@ class Transaction:
     This mostly follows the model from
     https://googleapis.dev/python/firestore/latest/transaction.html
     """
-    def __init__(self, client,
-                 max_attempts=MAX_ATTEMPTS, read_only=False):
+
+    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False):
         self._client = client
         self._max_attempts = max_attempts
         self._read_only = read_only
@@ -65,8 +64,9 @@ class Transaction:
         self._clean_up()
         return results
 
-    def get_all(self,
-                references: Iterable[DocumentReference]) -> Iterable[DocumentSnapshot]:
+    def get_all(
+        self, references: Iterable[DocumentReference]
+    ) -> Iterable[DocumentSnapshot]:
         return self._client.get_all(references)
 
     def get(self, ref_or_query) -> Iterable[DocumentSnapshot]:
@@ -84,9 +84,7 @@ class Transaction:
 
     def _add_write_op(self, write_op: Callable):
         if self._read_only:
-            raise ValueError(
-                "Cannot perform write operation in read-only transaction."
-            )
+            raise ValueError("Cannot perform write operation in read-only transaction.")
         self._write_ops.append(write_op)
 
     def create(self, reference: DocumentReference, document_data):
@@ -94,13 +92,11 @@ class Transaction:
         # it's already in the MockFirestore
         ...
 
-    def set(self, reference: DocumentReference, document_data: dict,
-            merge=False):
+    def set(self, reference: DocumentReference, document_data: dict, merge=False):
         write_op = partial(reference.set, document_data, merge=merge)
         self._add_write_op(write_op)
 
-    def update(self, reference: DocumentReference,
-               field_updates: dict, option=None):
+    def update(self, reference: DocumentReference, field_updates: dict, option=None):
         write_op = partial(reference.update, field_updates)
         self._add_write_op(write_op)
 
