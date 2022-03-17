@@ -14,3 +14,8 @@ class AsyncDocumentReference(DocumentReference):
 
     async def update(self, data: Dict[str, Any]):
         super().update(data)
+
+    def collection(self, name) -> 'AsyncCollectionReference':
+        from mockfirestore.async_collection import AsyncCollectionReference
+        coll_ref = super().collection(name)
+        return AsyncCollectionReference(coll_ref._data, coll_ref._path, self)
