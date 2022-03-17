@@ -13,3 +13,9 @@ from mockfirestore.collection import CollectionReference
 from mockfirestore.query import Query
 from mockfirestore._helpers import Timestamp
 from mockfirestore.transaction import Transaction
+
+from mockfirestore.async_client import AsyncMockFirestore
+from mockfirestore.async_document import AsyncDocumentReference
+from mockfirestore.async_collection import AsyncCollectionReference
+from mockfirestore.async_query import AsyncQuery
+from mockfirestore.async_transaction import AsyncTransaction
