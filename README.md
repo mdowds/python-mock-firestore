@@ -113,7 +113,7 @@ transaction.commit()
 
 * [Matt Dowds](https://github.com/mdowds)
 * [Chris Tippett](https://github.com/christippett)
-* [Anton Melnikov](https://github.com/notnami)
+* [Anna Melnikov](https://github.com/anna-hope)
 * [Ben Riggleman](https://github.com/briggleman)
 * [Steve Atwell](https://github.com/satwell)
 * [ahti123](https://github.com/ahti123)
