@@ -1,4 +1,6 @@
+from copy import deepcopy
 from typing import Dict, Any
+from mockfirestore import NotFound
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 
 
@@ -10,7 +12,13 @@ class AsyncDocumentReference(DocumentReference):
         super().delete()
 
     async def set(self, data: Dict[str, Any], merge=False):
-        super().set(data, merge=merge)
+        if merge:
+            try:
+                await self.update(deepcopy(data))
+            except NotFound:
+                await self.set(data)
+        else:
+            super().set(data, merge=merge)
 
     async def update(self, data: Dict[str, Any]):
         super().update(data)
