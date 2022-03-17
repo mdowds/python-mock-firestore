@@ -28,6 +28,10 @@ class AsyncMockFirestore(MockFirestore):
                 self._data[name] = {}
             return AsyncCollectionReference(self._data, [name])
 
+    async def collections(self) -> AsyncIterable[AsyncCollectionReference]:
+        for collection_name in self._data:
+            yield AsyncCollectionReference(self._data, [collection_name])
+
     async def get_all(
         self,
         references: Iterable[AsyncDocumentReference],
@@ -35,7 +39,7 @@ class AsyncMockFirestore(MockFirestore):
         transaction=None,
     ) -> AsyncIterable[DocumentSnapshot]:
         for doc_ref in set(references):
-            yield doc_ref.get()
+            yield await doc_ref.get()
 
     def transaction(self, **kwargs) -> AsyncTransaction:
         return AsyncTransaction(self, **kwargs)
