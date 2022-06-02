@@ -1,4 +1,4 @@
-from typing import List, AsyncGenerator, AsyncIterator
+from typing import List, AsyncIterator
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore.query import Query
 from mockfirestore._helpers import consume_async_iterable
