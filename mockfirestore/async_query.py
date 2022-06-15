@@ -1,4 +1,4 @@
-from typing import AsyncIterator, List
+from typing import List, AsyncIterator
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore.query import Query
 from mockfirestore._helpers import consume_async_iterable
@@ -13,4 +13,4 @@ class AsyncQuery(Query):
             yield doc_snapshot
 
     async def get(self, transaction=None) -> List[DocumentSnapshot]:
-        return super().get()
+        return await consume_async_iterable(self.stream())
