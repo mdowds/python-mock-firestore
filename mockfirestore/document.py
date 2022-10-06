@@ -45,22 +45,7 @@ class DocumentSnapshot:
         else:
             return reduce(operator.getitem, field_path.split('.'), self._doc)
 
-    def collections(self) -> list['CollectionReference']:
-        from mockfirestore.collection import CollectionReference
-
-        l = []
-        paths = []
-        for k in self._doc:
-            if type(self._doc[k]) is dict:
-                l.append(self._doc[k])
-                paths.append([])
-
-        l2 = []
-        for c, p in zip(l, paths):
-            l2.append(CollectionReference(c, p, self.reference))
-
-        return l2
-
+    
 
     def _get_by_field_path(self, field_path: str) -> Any:
         try:
@@ -109,3 +94,19 @@ class DocumentReference:
         if name not in document:
             set_by_path(self._data, new_path, {})
         return CollectionReference(self._data, new_path, parent=self)
+
+    def collections(self) -> list['CollectionReference']:
+        from mockfirestore.collection import CollectionReference
+
+        doc = self.get()
+        paths = []
+        for k in doc._doc:
+            if type(doc._doc[k]) is dict:
+                paths.append(self._path + [k])
+
+        l = []
+        for p in paths:
+            l.append(CollectionReference(self._data, p, self))
+
+        return l
+
