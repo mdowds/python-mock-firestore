@@ -59,4 +59,12 @@ class MockFirestore:
     def transaction(self, **kwargs) -> Transaction:
         return Transaction(self, **kwargs)
 
+    def recursive_delete(self,reference=None):
+        if reference == None:
+            return 
+        path = reference._path
+        cur = self._data
+        for p in path[:-1]:
+            cur = cur[p]
 
+        del cur[path[-1]]
