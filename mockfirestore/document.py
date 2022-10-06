@@ -2,7 +2,7 @@ from copy import deepcopy
 from functools import reduce
 import operator
 from typing import List, Dict, Any
-from mockfirestore import NotFound
+from mockfirestore import NotFound, collection
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
 )
@@ -44,6 +44,23 @@ class DocumentSnapshot:
             return None
         else:
             return reduce(operator.getitem, field_path.split('.'), self._doc)
+
+    def collections(self) -> list['CollectionReference']:
+        from mockfirestore.collection import CollectionReference
+
+        l = []
+        paths = []
+        for k in self._doc:
+            if type(self._doc[k]) is dict:
+                l.append(self._doc[k])
+                paths.append([])
+
+        l2 = []
+        for c, p in zip(l, paths):
+            l2.append(CollectionReference(c, p, self.reference))
+
+        return l2
+
 
     def _get_by_field_path(self, field_path: str) -> Any:
         try:
