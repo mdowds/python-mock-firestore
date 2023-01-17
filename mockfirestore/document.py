@@ -59,6 +59,15 @@ class DocumentReference:
         self._path = path
         self.parent = parent
 
+    def __hash__(self):
+        return hash(tuple(self._path))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+
+        return self._path == other._path
+
     @property
     def id(self):
         return self._path[-1]
