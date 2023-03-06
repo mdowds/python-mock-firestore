@@ -195,12 +195,14 @@ class TestCollectionReference(TestCase):
 
     def test_collection_whereByReference(self):
         fs = MockFirestore()
-        fs._data = {'foo': {
-            'first': {'ref': fs.document('bar/first')},
-            'second': {'ref': fs.document('bar/second')}
+        fs._data = {
+        'foo': {
+            'otherDocRef': {'ref': fs.document('bar/first')},
         }}
 
-        docs = list(fs.collection('foo').where('ref', '==', fs.document('bar/first')).stream())
+        doc_ref = fs.collection('bar').document('first')
+
+        docs = list(fs.collection('foo').where('ref', '==', doc_ref).stream())
         self.assertEqual(len(docs), 1)
         self.assertEqual({'ref': fs.document('bar/first')}, docs[0].to_dict())
 
