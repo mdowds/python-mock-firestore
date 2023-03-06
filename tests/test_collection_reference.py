@@ -193,6 +193,19 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'field': ['val4']}, contains_any_docs[0].to_dict())
         self.assertEqual({'field': ['val3', 'val2', 'val1']}, contains_any_docs[1].to_dict())
 
+    def test_collection_whereByReference(self):
+        fs = MockFirestore()
+        fs._data = {
+        'foo': {
+            'otherDocRef': {'ref': fs.document('bar/first')},
+        }}
+
+        doc_ref = fs.collection('bar').document('first')
+
+        docs = list(fs.collection('foo').where('ref', '==', doc_ref).stream())
+        self.assertEqual(len(docs), 1)
+        self.assertEqual({'ref': fs.document('bar/first')}, docs[0].to_dict())
+
     def test_collection_orderBy(self):
         fs = MockFirestore()
         fs._data = {'foo': {
