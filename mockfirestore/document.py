@@ -77,6 +77,17 @@ class DocumentReference:
                 self.set(data)
         else:
             set_by_path(self._data, self._path, deepcopy(data))
+            
+    def __hash__(self):
+        return hash(tuple(self._path))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+
+        return self._path == other._path
+
+
 
     def update(self, data: Dict[str, Any]):
         document = get_by_path(self._data, self._path)
