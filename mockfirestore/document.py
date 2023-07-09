@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 import operator
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
