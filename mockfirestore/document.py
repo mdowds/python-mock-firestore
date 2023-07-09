@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 import operator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
@@ -39,7 +39,7 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
-    def get(self, field_path: str) -> Any:
+    def get(self, field_path: str, transaction=None) -> Any:
         if not self.exists:
             return None
         else:
