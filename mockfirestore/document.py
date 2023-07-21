@@ -39,7 +39,7 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
-    def get(self, field_path: str) -> Any:
+    def get(self, field_path: str, transaction=None) -> Any:
         if not self.exists:
             return None
         else:
@@ -63,7 +63,11 @@ class DocumentReference:
     def id(self):
         return self._path[-1]
 
-    def get(self) -> DocumentSnapshot:
+    @property
+    def path(self):
+        return "/".join(self._path)
+
+    def get(self, transaction=None) -> DocumentSnapshot:
         return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
     def delete(self):
