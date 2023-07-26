@@ -336,3 +336,21 @@ class TestDocumentReference(TestCase):
         doc = fs.collection("foo").document("first").get().to_dict()
         self.assertEqual(doc["arr"], [1, 2, 3, 4])
 
+    def test_document_get_collections(self):
+        fs = MockFirestore()
+        fs._data = fs._data = {'top_collection': {
+            'top_document': {
+                'id': 1,
+                'nested_collection1': {
+                    'nested_document': {'id': 1.1}
+                },
+                'nested_collection2': {
+                    'nested_document': {'id': 1.2}
+                }
+            }
+        }}
+        coll = fs.collection('top_collection').document('top_document')
+        nested_collections = coll.collections()
+        self.assertEqual(2, len(coll.collections()))
+        self.assertEqual('nested_collection1', nested_collections[0].id)
+        self.assertEqual('nested_collection2', nested_collections[1].id)
