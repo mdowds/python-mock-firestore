@@ -92,3 +92,11 @@ class DocumentReference:
         if name not in document:
             set_by_path(self._data, new_path, {})
         return CollectionReference(self._data, new_path, parent=self)
+
+    def collections(self):
+        """
+        Simulate the collections() function of a Firestore document. 
+        """
+        from mockfirestore.collection import CollectionReference
+        document = get_by_path(self._data, self._path)
+        return [CollectionReference(self._data, self._path + [name]) for name in document.keys() if isinstance(document[name], dict)]
