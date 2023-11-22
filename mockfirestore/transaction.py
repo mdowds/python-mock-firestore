@@ -1,6 +1,6 @@
 from functools import partial
-import random
 from typing import Iterable, Callable
+
 from mockfirestore._helpers import generate_random_string, Timestamp
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.query import Query
@@ -22,6 +22,7 @@ class Transaction:
     This mostly follows the model from
     https://googleapis.dev/python/firestore/latest/transaction.html
     """
+
     def __init__(self, client,
                  max_attempts=MAX_ATTEMPTS, read_only=False):
         self._client = client
@@ -117,3 +118,9 @@ class Transaction:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             self.commit()
+
+
+class Batch(Transaction):
+    def commit(self):
+        self._begin()  # batch can call commit many times
+        super(Batch, self).commit()
