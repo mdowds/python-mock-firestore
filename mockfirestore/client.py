@@ -59,4 +59,7 @@ class MockFirestore:
     def transaction(self, **kwargs) -> Transaction:
         return Transaction(self, **kwargs)
 
+    def batch(self) -> Transaction:
+        return Transaction(self)
+
 
