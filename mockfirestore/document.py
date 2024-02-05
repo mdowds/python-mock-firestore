@@ -96,3 +96,13 @@ class DocumentReference:
         if name not in document:
             set_by_path(self._data, new_path, {})
         return CollectionReference(self._data, new_path, parent=self)
+
+    def collections(self) -> list['CollectionReference']:
+        from mockfirestore.collection import CollectionReference
+        document = get_by_path(self._data, self._path)
+        _collections = []
+        for collname, values in document.items():
+            if isinstance(values, dict):
+                new_path = self._path + [collname]
+                _collections.append(CollectionReference(self._data, new_path, parent=self))
+        return _collections

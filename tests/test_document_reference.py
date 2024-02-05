@@ -89,6 +89,23 @@ class TestDocumentReference(TestCase):
 
         self.assertEqual({'id': 1.1}, doc)
 
+    def test_get_nestedCollections(self):
+        fs = MockFirestore()
+        fs._data = {'top_collection': {
+            'top_document': {
+                'id': 1,
+                'nested_collection': {
+                    'nested_document': {'id': 1.1}
+                }
+            }
+        }}
+        collections = fs.collection('top_collection')\
+            .document('top_document')\
+            .collections()
+
+        self.assertEqual(1, len(collections))
+        self.assertEqual(collections[0].id, 'nested_collection')
+
     def test_get_nestedDocument_documentDoesNotExist(self):
         fs = MockFirestore()
         fs._data = {'top_collection': {
