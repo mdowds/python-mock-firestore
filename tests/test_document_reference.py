@@ -16,6 +16,23 @@ class TestDocumentReference(TestCase):
         self.assertEqual({'id': 1}, doc.to_dict())
         self.assertEqual('first', doc.id)
 
+    def test_get_document_by_path_with_transaction_kwarg(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.document('foo/first').get(transaction='tx')
+        self.assertEqual({'id': 1}, doc.to_dict())
+        self.assertEqual('first', doc.id)
+
+    def test_document_path_property(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.document('foo/first')
+        self.assertEqual('foo/first', doc.path)
+
     def test_set_document_by_path(self):
         fs = MockFirestore()
         fs._data = {}
@@ -23,7 +40,7 @@ class TestDocumentReference(TestCase):
         fs.document('foo/doc1/bar/doc2').set(doc_content)
         doc = fs.document('foo/doc1/bar/doc2').get().to_dict()
         self.assertEqual(doc_content, doc)
-        
+
     def test_document_get_returnsDocument(self):
         fs = MockFirestore()
         fs._data = {'foo': {
