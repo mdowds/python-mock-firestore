@@ -16,6 +16,15 @@ class TestDocumentReference(TestCase):
         self.assertEqual({'id': 1}, doc.to_dict())
         self.assertEqual('first', doc.id)
 
+    def test_get_document_by_path_with_transaction_kwarg(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1}
+        }}
+        doc = fs.document('foo/first').get(transaction='tx')
+        self.assertEqual({'id': 1}, doc.to_dict())
+        self.assertEqual('first', doc.id)
+
     def test_document_path_property(self):
         fs = MockFirestore()
         fs._data = {'foo': {
