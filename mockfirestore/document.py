@@ -63,6 +63,10 @@ class DocumentReference:
     def id(self):
         return self._path[-1]
 
+    @property
+    def path(self):
+        return '/'.join(self._path)
+
     def get(self) -> DocumentSnapshot:
         return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
