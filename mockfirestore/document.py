@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 import operator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Iterable
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
@@ -63,7 +63,13 @@ class DocumentReference:
     def id(self):
         return self._path[-1]
 
-    def get(self) -> DocumentSnapshot:
+    def get(
+        self,
+        field_paths: Optional[Iterable[str]] = None,
+        transaction: Any = None,
+        retry: Any = None,
+        timeout: Optional[float] = None,
+    ) -> DocumentSnapshot:
         return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
     def delete(self):
