@@ -6,7 +6,7 @@ To install:
 
 `pip install mock-firestore`
 
-Python 3.6+ is required for it to work.
+Python 3.7+ is required for it to work.
 
 ## Usage
 
@@ -105,7 +105,7 @@ transaction.commit()
 ```
 
 ## Running the tests
-* Create and activate a virtualenv with a Python version of at least 3.6
+* Create and activate a virtualenv with a Python version of at least 3.7
 * Install dependencies with `pip install -r requirements-dev-minimal.txt`
 * Run tests with `python -m unittest discover tests -t /`
 

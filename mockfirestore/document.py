@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 import operator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
@@ -22,8 +22,8 @@ class DocumentSnapshot:
     def exists(self) -> bool:
         return self._doc != {}
 
-    def to_dict(self) -> Document:
-        return self._doc
+    def to_dict(self) -> Union[Dict[str, Any], None]:
+        return self._doc if self.exists else None
 
     @property
     def create_time(self) -> Timestamp:
@@ -39,7 +39,7 @@ class DocumentSnapshot:
         timestamp = Timestamp.from_now()
         return timestamp
 
-    def get(self, field_path: str) -> Any:
+    def get(self, field_path: str, timeout: float = None) -> Any:
         if not self.exists:
             return None
         else:
@@ -63,13 +63,13 @@ class DocumentReference:
     def id(self):
         return self._path[-1]
 
-    def get(self) -> DocumentSnapshot:
+    def get(self, timeout: float=None) -> DocumentSnapshot:
         return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
-    def delete(self):
+    def delete(self, timeout: float=None):
         delete_by_path(self._data, self._path)
 
-    def set(self, data: Dict, merge=False):
+    def set(self, data: Dict, merge=False, timeout: float=None):
         if merge:
             try:
                 self.update(deepcopy(data))
@@ -78,7 +78,7 @@ class DocumentReference:
         else:
             set_by_path(self._data, self._path, deepcopy(data))
 
-    def update(self, data: Dict[str, Any]):
+    def update(self, data: Dict[str, Any], timeout: float=None):
         document = get_by_path(self._data, self._path)
         if document == {}:
             raise NotFound('No document to update: {}'.format(self._path))
