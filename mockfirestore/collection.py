@@ -23,12 +23,12 @@ class CollectionReference:
             set_by_path(self._data, new_path, {})
         return DocumentReference(self._data, new_path, parent=self)
 
-    def get(self) -> Iterable[DocumentSnapshot]:
+    def get(self, timeout: Union[float, None] = None) -> Iterable[DocumentSnapshot]:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',
                       category=DeprecationWarning)
         return self.stream()
 
-    def add(self, document_data: Dict, document_id: str = None) \
+    def add(self, document_data: Dict, document_id: str = None, timeout: Union[float, None] = None) \
             -> Tuple[Timestamp, DocumentReference]:
         if document_id is None:
             document_id = document_data.get('id', generate_random_string())
@@ -41,8 +41,8 @@ class CollectionReference:
         timestamp = Timestamp.from_now()
         return timestamp, doc_ref
 
-    def where(self, field: str, op: str, value: Any) -> Query:
-        query = Query(self, field_filters=[(field, op, value)])
+    def where(self, field: Optional[str] = None, op: Optional[str] = None, value: Any = None, filter=None) -> Query:
+        query = Query(self, field_filters=[Query.make_field_filter(field, op, value, filter)])
         return query
 
     def order_by(self, key: str, direction: Optional[str] = None) -> Query:
@@ -73,13 +73,13 @@ class CollectionReference:
         query = Query(self, end_at=(document_fields_or_snapshot, False))
         return query
 
-    def list_documents(self, page_size: Optional[int] = None) -> Sequence[DocumentReference]:
+    def list_documents(self, page_size: Optional[int] = None, timeout: Union[float, None] = None) -> Sequence[DocumentReference]:
         docs = []
         for key in get_by_path(self._data, self._path):
             docs.append(self.document(key))
         return docs
 
-    def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
+    def stream(self, transaction=None, timeout: Union[float, None] = None) -> Iterable[DocumentSnapshot]:
         for key in sorted(get_by_path(self._data, self._path)):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot

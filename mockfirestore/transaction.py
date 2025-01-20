@@ -5,6 +5,8 @@ from mockfirestore._helpers import generate_random_string, Timestamp
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.query import Query
 
+from typing import Union
+
 MAX_ATTEMPTS = 5
 _MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
 _CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
@@ -66,10 +68,11 @@ class Transaction:
         return results
 
     def get_all(self,
-                references: Iterable[DocumentReference]) -> Iterable[DocumentSnapshot]:
+                references: Iterable[DocumentReference],
+                timeout: Union[float, None]=None) -> Iterable[DocumentSnapshot]:
         return self._client.get_all(references)
 
-    def get(self, ref_or_query) -> Iterable[DocumentSnapshot]:
+    def get(self, ref_or_query, timeout: Union[float,None]=None) -> Iterable[DocumentSnapshot]:
         if isinstance(ref_or_query, DocumentReference):
             return self._client.get_all([ref_or_query])
         elif isinstance(ref_or_query, Query):

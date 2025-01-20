@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 import operator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
     Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
@@ -63,13 +63,13 @@ class DocumentReference:
     def id(self):
         return self._path[-1]
 
-    def get(self) -> DocumentSnapshot:
+    def get(self, timeout: Union[float, None]=None) -> DocumentSnapshot:
         return DocumentSnapshot(self, get_by_path(self._data, self._path))
 
-    def delete(self):
+    def delete(self, timeout: Union[float, None]=None):
         delete_by_path(self._data, self._path)
 
-    def set(self, data: Dict, merge=False):
+    def set(self, data: Dict, merge=False, timeout: Union[float, None]=None):
         if merge:
             try:
                 self.update(deepcopy(data))
@@ -78,14 +78,14 @@ class DocumentReference:
         else:
             set_by_path(self._data, self._path, deepcopy(data))
 
-    def update(self, data: Dict[str, Any]):
+    def update(self, data: Dict[str, Any], timeout: Union[float, None]=None):
         document = get_by_path(self._data, self._path)
         if document == {}:
             raise NotFound('No document to update: {}'.format(self._path))
 
         apply_transformations(document, deepcopy(data))
 
-    def collection(self, name) -> 'CollectionReference':
+    def collection(self, name, timeout: Union[float, None]=None) -> 'CollectionReference':
         from mockfirestore.collection import CollectionReference
         document = get_by_path(self._data, self._path)
         new_path = self._path + [name]

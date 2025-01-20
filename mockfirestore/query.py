@@ -24,7 +24,7 @@ class Query:
             for field_filter in field_filters:
                 self._add_field_filter(*field_filter)
 
-    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
+    def stream(self, transaction=None, timeout: Union[float, None]=None) -> Iterator[DocumentSnapshot]:
         doc_snapshots = self.parent.stream()
 
         for field, compare, value in self._field_filters:
@@ -52,7 +52,7 @@ class Query:
 
         return iter(doc_snapshots)
 
-    def get(self) -> Iterator[DocumentSnapshot]:
+    def get(self, timeout: Union[float, None]=None) -> Iterator[DocumentSnapshot]:
         warnings.warn('Query.get is deprecated, please use Query.stream',
                       category=DeprecationWarning)
         return self.stream()
@@ -61,8 +61,20 @@ class Query:
         compare = self._compare_func(op)
         self._field_filters.append((field, compare, value))
 
-    def where(self, field: str, op: str, value: Any) -> 'Query':
-        self._add_field_filter(field, op, value)
+    @staticmethod
+    def make_field_filter(field: Optional[str], op: Optional[str], value: Any = None, filter=None):
+        if bool(filter) and (bool(field) or bool(op)):
+            raise ValueError("Can't pass in both the positional arguments and 'filter' at the same time")
+        if filter:
+            classname = filter.__class__.__name__
+            if not classname.endswith('FieldFilter'):
+                raise NotImplementedError('composite filters not supported by mockfirestore (got %s)' % classname)
+            return (filter.field_path, filter.op_string, filter.value)
+        else:
+            return (field, op, value)
+
+    def where(self, field: Optional[str] = None, op: Optional[str] = None, value: Any = None, filter=None) -> 'Query':
+        self._add_field_filter(*self.make_field_filter(field, op, value, filter))
         return self
 
     def order_by(self, key: str, direction: Optional[str] = 'ASCENDING') -> 'Query':

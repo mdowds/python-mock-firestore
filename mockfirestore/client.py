@@ -1,4 +1,4 @@
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Union
 from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.transaction import Transaction
@@ -44,7 +44,7 @@ class MockFirestore:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
 
-    def collections(self) -> Sequence[CollectionReference]:
+    def collections(self, timeout: Union[float, None]=None) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
 
     def reset(self):
@@ -52,7 +52,8 @@ class MockFirestore:
 
     def get_all(self, references: Iterable[DocumentReference],
                 field_paths=None,
-                transaction=None) -> Iterable[DocumentSnapshot]:
+                transaction=None,
+                timeout: Union[float, None]=None) -> Iterable[DocumentSnapshot]:
         for doc_ref in set(references):
             yield doc_ref.get()
 
