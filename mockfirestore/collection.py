@@ -13,6 +13,9 @@ class CollectionReference:
         self._data = data
         self._path = path
         self.parent = parent
+        self.id = None
+        if len(path):
+            self.id = path[0]
 
     def document(self, document_id: Optional[str] = None) -> DocumentReference:
         collection = get_by_path(self._data, self._path)
@@ -80,6 +83,6 @@ class CollectionReference:
         return docs
 
     def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
-        for key in sorted(get_by_path(self._data, self._path)):
+        for key in sorted({str(k):v for k,v in get_by_path(self._data, self._path).items()}):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot
