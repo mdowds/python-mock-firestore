@@ -32,9 +32,18 @@ class Query:
                              if compare(doc_snapshot._get_by_field_path(field), value)]
 
         if self.orders:
+
+            def _sort_by(doc: dict, key: str):
+                """Allow sorting by nested keys."""
+                d = doc.to_dict()
+                # Nesting denoted with '.'
+                for k in key.split('.'):
+                    d = d[k]
+                return d
+
             for key, direction in self.orders:
                 doc_snapshots = sorted(doc_snapshots,
-                                       key=lambda doc: doc.to_dict()[key],
+                                       key=lambda doc: _sort_by(doc, key),
                                        reverse=direction == 'DESCENDING')
         if self._start_at:
             document_fields_or_snapshot, before = self._start_at
